@@ -1,0 +1,387 @@
+/* ------------------------------
+   COLORS
+------------------------------ */
+:root {
+  --blue-light: #99B7C6;
+  --purple-light: #978EC4;
+  --white: #F9F5EA;
+  --pink-light: #FFD8D1;
+  --pink-medium: #F9AFB1;
+  --green-light: #9AB59D;
+  --black-dark: #3A3F3B;
+  --peach: #F4B092;
+  --red: #CE325B;
+  --superwhite : #ffffff;
+}
+
+/* ------------------------------
+   FONTS
+------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;700&family=TT+Milk+Script&display=swap');
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--white);
+  color: var(--black-dark);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'DM Serif Display', serif;
+  color: var(--black-dark);
+}
+
+.logo {
+  font-family: 'TT Milk Script', cursive;
+  color: var(--black-dark);
+  font-size: 2.5rem;
+}
+
+/* ------------------------------
+   HEADER
+------------------------------ */
+header {
+  background-color: var(--pink-light);
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+/* ------------------------------
+   NAVIGATION
+------------------------------ */
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--black-dark);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+nav a:hover {
+  background-color: var(--pink-medium);
+  color: var(--white);
+}
+
+/* ------------------------------
+   MAIN CONTENT
+------------------------------ */
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+button {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--green-light);
+  color: var(--white);
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--peach);
+  color: var(--black-dark);
+}
+
+/* ------------------------------
+   FOOTER
+------------------------------ */
+footer {
+  background-color: var(--pink-medium);
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--white);
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
+/* ------------------------------
+   LOGIN FORM
+------------------------------ */
+.login-form {
+  background-color: var(--pink-light);
+  padding: 2rem;
+  border-radius: 10px;
+  max-width: 400px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 8px rgba(58, 63, 59, 0.2);
+}
+
+.login-form label {
+  font-weight: 600;
+  color: var(--black-dark);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--blue-light);
+  border-radius: 5px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--purple-light);
+  box-shadow: 0 0 5px var(--purple-light);
+}
+
+/* ------------------------------
+   ALERT MESSAGES
+------------------------------ */
+.alert {
+  padding: 1rem;
+  margin: 1rem auto;
+  max-width: 400px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.alert-error {
+  background-color: var(--red);
+  color: var(--white);
+}
+
+.alert-success {
+  background-color: var(--green-light);
+  color: var(--white);
+}
+/* ------------------------------
+   COLORS
+------------------------------ */
+:root {
+  --blue-light: #99B7C6;
+  --purple-light: #978EC4;
+  --white: #F9F5EA;
+  --pink-light: #FFD8D1;
+  --pink-medium: #F9AFB1;
+  --green-light: #9AB59D;
+  --black-dark: #3A3F3B;
+  --peach: #F4B092;
+  --red: #CE325B;
+}
+
+/* ------------------------------
+   FONTS
+------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;700&family=TT+Milk+Script&display=swap');
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--white);
+  color: var(--black-dark);
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'DM Serif Display', serif;
+  color: var(--black-dark);
+}
+
+.logo {
+  font-family: 'TT Milk Script', cursive;
+  color: var(--black-dark);
+  font-size: 2.5rem;
+}
+
+/* ------------------------------
+   HEADER
+------------------------------ */
+header {
+  background-color: var(--pink-light);
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+/* ------------------------------
+   NAVIGATION
+------------------------------ */
+nav ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--black-dark);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+nav a:hover {
+  background-color: var(--pink-medium);
+  color: var(--white);
+}
+
+/* ------------------------------
+   MAIN CONTENT
+------------------------------ */
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+button {
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--green-light);
+  color: var(--white);
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: var(--peach);
+  color: var(--black-dark);
+}
+
+/* ------------------------------
+   FOOTER
+------------------------------ */
+footer {
+  background-color: var(--pink-medium);
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--white);
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
+
+
+/* ------------------------------
+   LOGIN CARD
+------------------------------ */
+.login-card {
+  background-color: var(--white);
+  border: 1px solid var(--blue-light);
+  border-radius: 12px;          /* Rounded corners */
+  max-width: 400px;
+  margin: 5rem auto;            /* Center horizontally with margin */
+  padding: 2rem;
+  box-shadow: 0 6px 12px rgba(58, 63, 59, 0.15); /* Subtle shadow */
+  text-align: center;
+}
+
+.login-card h1 {
+  margin-bottom: 0.5rem;
+  color: var(--black-dark);
+}
+
+.login-card p {
+  margin-bottom: 1.5rem;
+  color: var(--black-dark);
+}
+
+.login-card .form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.login-card label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid var(--blue-light);
+  border-radius: 5px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--purple-light);
+  box-shadow: 0 0 5px var(--purple-light);
+}
+
+.signup-link {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.signup-link a {
+  color: var(--purple-light);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signup-link a:hover {
+  color: var(--pink-medium);
+}
+
+/* HEADER BACKGROUND */
+.er-header {
+  background-color: #F4CFC9; /* Ella Rises pink */
+  text-align: center;
+  padding: 40px 0 20px;
+}
+
+/* LOGO STYLING — NICE + SMALLER */
+.er-logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.er-logo {
+  height: 170px;        /* same size as your screenshot */
+  width: auto;
+  border-radius: 20px;
+  padding: 15px;
+  background-color: #F4CFC9;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* soft glow */
+}
+
+/* NAV BELOW LOGO */
+.er-nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  padding: 0;
+  margin: 0;
+}
+
+.er-nav a {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+}
+
+.er-nav a:hover {
+  color: #000;
+}
+
+.er-about {
+  text-align: center;
+}

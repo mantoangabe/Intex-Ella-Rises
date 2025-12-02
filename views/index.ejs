@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ella Rises</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+
+<header class="er-header">
+
+  <!-- Centered Logo -->
+  <div class="er-logo-wrap">
+    <img src="/images/ella.jpeg" alt="Ella Rises Logo" class="er-logo">
+  </div>
+
+  <!-- Navigation BELOW logo -->
+  <nav class="er-nav">
+    <ul>
+      <li><a href="/participants">Participants</a></li>
+      <li><a href="/surveys">Surveys</a></li>
+      <li><a href="/milestones">Milestones</a></li>
+      <li><a href="/donations">Donations</a></li>
+      <% if (user) { %>
+        <li><a href="/dashboard">Dashboard</a></li>
+      <% } else { %>
+        <li><a href="/login">Login</a></li>
+      <% } %>
+    </ul>
+  </nav>
+
+</header>
+
+
+
+</header>
+
+<!-- HERO -->
+<section class="er-about">
+  <div class="er-hero-overlay"></div>
+  <div class="er-hero-content">
+    <h1>Empowering Young Women to Rise</h1>
+    <p>Ella Rises uplifts young women through leadership, faith, education, community, and purpose.</p>
+
+    
+    
+  </div>
+</section>
+
+<!-- ABOUT SECTION -->
+<section class="er-about">
+  <h2>Our Mission</h2>
+  <p>
+    Empowering young women to pursue higher education through high-impact multicultural activities focused on mariachi and STEAM.
+  </p>
+</section>
+
+<!-- USER SECTION -->
+<main class="er-main">
+  
+</main>
+
+<footer class="er-footer">
+  <p>&copy; 2025 Ella Rises — Empowering Young Women</p>
+</footer>
+
+</body>
+</html>
