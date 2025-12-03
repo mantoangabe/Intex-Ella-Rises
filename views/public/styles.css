@@ -20,6 +20,13 @@ body {
   margin: 0;
 }
 
+.custom-bg {
+  background-color: #FFD8D1 !important;
+}
+.custom-nav-color {
+  background-color: #99B7C6 !important;
+}
+
 /* ============================
    NAVBAR
 ============================ */

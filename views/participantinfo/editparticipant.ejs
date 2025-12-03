@@ -6,19 +6,51 @@
     <title>Edit User - Participant Database</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Custom CSS for colors -->
     <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body class="bg-light">
+<body class="bg-light custom-bg">
 
-    <nav class="navbar navbar-dark bg-primary shadow-sm mb-4">
-        <div class="container">
-            <span class="navbar-brand">
-                <i class="bi bi-pencil-square"></i> Edit Participant
-            </span>
-        </div>
-    </nav>
+    <nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+        <% if (!user) { %>
+          <li class="nav-item">
+            <a class="nav-link er-donate-btn" href="/login">Login</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/events">Events</a></li>
+
+          <% if (user.role === "admin") { %>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
+          <% } %>
+
+          <li class="nav-item">
+            <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+
+  </div>
+</nav>
 
     <div class="container py-4">
 
@@ -32,30 +64,30 @@
 
                     <div class="card-body p-4">
 
-                        <form action="/update/<%= user.participant_id %>" method="POST">
+                        <form action="/update/<%= participant.participant_id %>" method="POST">
 
                             <!-- Participant ID -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Participant ID</label>
-                                <input type="text" class="form-control" value="<%= user.participant_id %>" disabled>
+                                <input type="text" class="form-control" value="<%= participant.participant_id %>" disabled>
                             </div>
 
                             <!-- First Name -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">First Name</label>
-                                <input type="text" name="first_name" class="form-control" value="<%= user.first_name %>" required>
+                                <input type="text" name="first_name" class="form-control" value="<%= participant.first_name %>" required>
                             </div>
 
                             <!-- Last Name -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" value="<%= user.last_name %>" required>
+                                <input type="text" name="last_name" class="form-control" value="<%= participant.last_name %>" required>
                             </div>
 
                             <!-- Email -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Email</label>
-                                <input type="email" name="email" class="form-control" value="<%= user.email %>" required>
+                                <input type="email" name="email" class="form-control" value="<%= participant.email %>" required>
                             </div>
 
                             <!-- Password (Optional) -->
@@ -75,7 +107,7 @@
                                     type="date" 
                                     name="dob" 
                                     class="form-control" 
-                                    value="<%= user.dob.toISOString().split('T')[0] %>" 
+                                    value="<%= participant.dob.toISOString().split('T')[0] %>" 
                                     required>
                             </div>
 
@@ -93,37 +125,37 @@
                             <!-- Phone -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Phone</label>
-                                <input type="text" name="phone" class="form-control" value="<%= user.phone %>" required>
+                                <input type="text" name="phone" class="form-control" value="<%= participant.phone %>" required>
                             </div>
 
                             <!-- City -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">City</label>
-                                <input type="text" name="city" class="form-control" value="<%= user.city %>" required>
+                                <input type="text" name="city" class="form-control" value="<%= participant.city %>" required>
                             </div>
 
                             <!-- State -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">State</label>
-                                <input type="text" name="state" class="form-control" value="<%= user.state %>" required>
+                                <input type="text" name="state" class="form-control" value="<%= participant.state %>" required>
                             </div>
 
                             <!-- Zip Code -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Zip Code</label>
-                                <input type="text" name="zip" class="form-control" value="<%= user.zip %>" required>
+                                <input type="text" name="zip" class="form-control" value="<%= participant.zip %>" required>
                             </div>
 
                             <!-- School / Employer -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">School / Employer</label>
-                                <input type="text" name="school_or_employer" class="form-control" value="<%= user.school_or_employer %>" required>
+                                <input type="text" name="school_or_employer" class="form-control" value="<%= participant.school_or_employer %>" required>
                             </div>
 
                             <!-- Field of Interest -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Field of Interest</label>
-                                <input type="text" name="field_of_interest" class="form-control" value="<%= user.field_of_interest %>" required>
+                                <input type="text" name="field_of_interest" class="form-control" value="<%= participant.field_of_interest %>" required>
                             </div>
 
                             <!-- Buttons -->

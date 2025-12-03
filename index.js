@@ -156,7 +156,7 @@ app.get("/participants", requireLogin, requireManager, async (req, res) => {
 app.get("/addparticipant", requireLogin, requireManager, (req, res) => {
   res.render("participantinfo/addparticipant.ejs", { 
     user: req.session.user,
-    error: null 
+    error: null
   });
 });
 
@@ -165,16 +165,15 @@ app.get("/addparticipant", requireLogin, requireManager, (req, res) => {
 // POST route for adding participants
 app.post("/addparticipant", async (req, res) => {
   try {
-    const { 
-      email, password, first_name, last_name, dob, city, state, zip,
-      school_or_employer, phone, role, field_of_interest 
-    } = req.body;
+    const { email, password, first_name, last_name, dob, city, state, zip, school_or_employer, phone, role, field_of_interest } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // 1. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 = salt rounds
 
+    // 2. Insert into the DB
     await knex("participants").insert({
       email,
-      password: hashedPassword,
+      password: hashedPassword,    // store hashed password
       first_name,
       last_name,
       dob,
@@ -188,15 +187,14 @@ app.post("/addparticipant", async (req, res) => {
     });
 
     res.redirect("/participants");
+
   } catch (err) {
     console.error(err);
-    res.render("participantinfo/addparticipant.ejs", { 
-      user: req.session.user,
-      error: "Error adding participant." 
-    });
+    res.render("participantinfo/addparticipant.ejs", { error: "Error adding participant." });
   }
 });
-// Delete participant route
+
+
 app.post("/deleteparticipant/:id", requireLogin, requireManager, async (req, res) => {
   const participantId = req.params.id;
   try {
@@ -208,46 +206,30 @@ app.post("/deleteparticipant/:id", requireLogin, requireManager, async (req, res
   }
 });
 //Search route
-app.post("/searchparticipants", requireLogin, requireManager, async (req, res) => {
+app.post('/searchparticipants', requireLogin, requireManager, async (req, res) => {
   const UserSearch = req.body.UserSearch;
 
   try {
-    const result = await knex("participants")
-      .select("*")
+    const result = await knex('participants')
+      .select('*')
       .where({ email: UserSearch })
       .first();
 
     if (result) {
-      res.render("participantinfo/participantresult.ejs", { 
-        user: req.session.user,       // logged-in user
-        participant: result,          // search result
-        found: true,
-        searchTerm: UserSearch 
-      });
+      res.render('participantinfo/participantresult.ejs', { user: result, found: true });
     } else {
-      res.render("participantinfo/participantresult.ejs", { 
-        user: req.session.user,
-        participant: null,
-        found: false,
-        searchTerm: UserSearch 
-      });
+      res.render('participantinfo/participantresult.ejs', { user: null, found: false, searchTerm: UserSearch });
     }
   } catch (err) {
-    console.error("Error searching users:", err);
-    res.status(500).send("Error searching for users");
+    console.error('Error searching users:', err);
+    res.status(500).send('Error searching for users');
   }
 });
 
-
 // Result page
-app.get("/participantresult", requireLogin, requireManager, (req, res) => {
-  res.render("participantinfo/participantresult.ejs", { 
-    user: req.session.user,
-    participant: null,
-    found: false
-  });
+app.get('/participantresult', requireLogin, requireManager, (req, res) => {
+  res.render('participantinfo/participantresult.ejs', { user: req.session.user }, { user: null, found: false });
 });
-
 
 //Edit page
 // Load edit form
@@ -263,15 +245,14 @@ app.get("/editparticipant/:id", requireLogin, requireManager, async (req, res) =
       return res.status(404).send("User not found");
     }
 
-    // ensure DOB is a Date object if needed
-    if (participant.dob) {
-      participant.dob = new Date(participant.dob);
-    }
+    // Convert DOB into Date object if needed
+    participant.dob = new Date(participant.dob);
 
     res.render("participantinfo/editparticipant.ejs", { 
-      user: req.session.user,        // logged-in user (for header)
-      participant                    // the record being edited
+      user: req.session.user,   // logged-in user (navbar)
+      participant               // the user being edited
     });
+
   } catch (err) {
     console.error("Error loading edit page:", err);
     res.status(500).send("Error loading edit page");
@@ -362,6 +343,44 @@ app.post("/donations", requireLogin, async (req, res) => {
   }
 });
 
+// DONATION ROUTES
+
+app.get("/donations", requireLogin, async (req, res) => {
+  const success = req.query.success === "1";
+
+  res.render("donations/donations", {
+    user: req.session.user,
+    message: success ? "Donation recorded successfully!" : null
+  });
+});
+
+
+app.post("/donations", requireLogin, async (req, res) => {
+  const { amount } = req.body;
+
+  try {
+    const participantId = req.session.user.id; // ← comes from session
+
+    await knex("donations").insert({
+      participant_id: participantId,
+      amount,
+      donation_date: new Date()
+    });
+
+    res.redirect("/donations?success=1");
+  } catch (err) {
+    console.error("Error saving donation:", err);
+    res.status(500).send("Error saving donation");
+  }
+});
+
+// Get route for Tableau dashboard
+app.get("/dashboard", requireLogin, requireManager, (req, res) => {
+  res.render("dashboard/dashboard.ejs", { 
+    user: req.session.user,
+    error: null
+  });
+});
 
 
 // --------------------------
