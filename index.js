@@ -396,6 +396,24 @@ async function syncDonationSequence() {
     console.error("⚠️ Failed to sync donations sequence:", err);
   }
 }
+
+async function syncEventSequence() {
+  try {
+    const result = await knex("event_occurrences").max("event_occurrence_id as max_id");
+    const maxId = result[0].max_id || 0;
+    const nextVal = maxId + 1;
+
+    await knex.raw(
+      "SELECT setval('public.event_occurrences_event_occurrence_id_seq', ?, false);",
+      [nextVal]
+    );
+
+    console.log(`✅ event_occurrences_event_occurrence_id_seq synced to start at ${nextVal}`);
+  } catch (err) {
+    console.error("⚠️ Failed to sync event sequence:", err);
+  }
+}
+
 // =======================================================
 // EVENTS MANAGEMENT ROUTES
 // =======================================================
@@ -602,8 +620,8 @@ app.get("/debug", (req, res) => {
 // --------------------------
 async function startServer() {
   try {
-    // Fix sequence on startup so inserts don't break
     await syncDonationSequence();
+    await syncEventSequence();  // <-- ADD THIS LINE
 
     app.listen(3000, () => {
       console.log("Server running on port 3000");
@@ -613,6 +631,7 @@ async function startServer() {
     process.exit(1);
   }
 }
+
 
 startServer();
 
