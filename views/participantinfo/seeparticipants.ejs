@@ -11,19 +11,18 @@
         <nav class="navbar navbar-dark bg-primary mb-4">
         <div class="container">
             <span class="navbar-brand mb-0 h1">
-                <i class="bi bi-fire"></i> View Participant
+                <i class="bi bi-fire"></i> View Participants
                 <br>
-                <br>
-                <a class="btn-dark" href="/home">🏠</a>
+                
             </span>
         </div>
     </nav>
-<% if ( role ==="M" ) { %>
+<% if ( role ==="admin" ) { %>
 <div class="container">
     <div class="row mb-4 justify-content-center">   
         <div class="col-4">
             <div class="text-center">
-                <a href="/adduser" class="btn btn-danger btn-lg" role="button">Add User</a>            
+                <a href="/addparticipant" class="btn btn-danger btn-lg" role="button">Add User</a>            
             </div>
         </div>
     </div>
@@ -43,13 +42,13 @@
                         <h5 class="mb-0"><i class="bi bi-search"></i> Search Users</h5>
                     </div>
                     <div class="card-body">
-                        <form action="/searchusers" method="POST">
+                        <form action="/searchparticipants" method="POST">
                             <div class="input-group">
                                 <input 
                                     type="text" 
                                     name="UserSearch" 
                                     class="form-control form-control-lg" 
-                                    placeholder="Enter username..." 
+                                    placeholder="Enter email..." 
                                     required
                                 >
                                 <button class="btn btn-dark btn-lg" type="submit">
@@ -73,26 +72,42 @@
                             <table class="table table-hover table-striped mb-0">
                                 <thead class="table-dark">
                                     <tr>
+                                        <th>UserID</th>
                                         <th>First Name</th>
                                         <th>Last Name</th>
                                         <th>Email</th>
                                         <th>Role</th>
                                         <th>Date of Birth</th>
                                         <th>Phone</th>
-                                        <th>Address</th>
+                                        <th>City</th>
                                         <th>City/Employer</th>
                                         <th>Interests</th>
-                                        <% if ( role ==="M" ) { %><th>Actions</th><% } %>
+                                        <% if ( role ==="admin" ) { %><th>Actions</th><% } %>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <% participants.forEach(u => { %>
                                         <tr>
-                                            <td class="fw-bold"><%= u.username %></td>
-                                            <td class="fw-bold"><%=u.password %></td>
-                                            <td><span class="badge bg-danger fs-6"><%= u.level %></span></td>
-                                            <% if ( role ==="M" ) { %><td>
-                                                <form action="/users/deleteuser/<%= u.username %>" 
+                                            <td class="fw-bold"><%= u.participant_id %></td>
+                                            <td class="fw-bold"><%=u.first_name %></td>
+                                            <td class="fw-bold"><%=u.last_name %></td>
+                                            <td class="fw-bold"><%=u.email %></td>
+                                            <td class="fw-bold"><%=u.role %></td>
+                                            <td class="fw-bold"><% let dateDisplay = u.dob;
+                                                if (dateDisplay instanceof Date) {
+                                                dateDisplay = dateDisplay.toISOString().split('T')[0];
+                                                } else if (typeof dateDisplay === 'string') {
+                                                dateDisplay = dateDisplay.split('T')[0];
+                                                }
+                                                %>
+
+                                                <%= dateDisplay %></td>
+                                            <td class="fw-bold"><%=u.phone %></td>
+                                            <td class="fw-bold"><%=u.city %></td>
+                                            <td class="fw-bold"><%=u.school_or_employer %></td>
+                                            <td class="fw-bold"><%=u.field_of_interest %></td>
+                                            <% if ( role === "admin" ) { %><td>
+                                                <form action="/deleteparticipant/<%= u.participant_id %>"
                                                       method="POST" 
                                                       style="display:inline;"
                                                       onsubmit="return confirm('Are you sure you want to delete this user?');">                                      
@@ -102,10 +117,10 @@
                                                 </form>
                                                 
                                                 <form>
-                                                    <a href="/users/edit/<%= u.username %>" class="btn btn-success btn-sm">
+                                                    <a href="/editparticipant/<%= u.participant_id %>" class="btn btn-success btn-sm">
                                                     <i class="bi bi-pencil"></i> Edit
                                                     </a>
-                                                </form>
+                                                </form> 
                                             </td>
                                             <% } %>
                                         </tr>

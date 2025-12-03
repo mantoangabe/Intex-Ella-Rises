@@ -63,7 +63,7 @@ function requireLogin(req, res, next) {
 }
 
 function requireManager(req, res, next) {
-  if (!req.session.user || req.session.user.role !== "manager") {
+  if (!req.session.user || req.session.user.role !== "admin") {
     return res.status(403).send("Forbidden");
   }
   next();
@@ -134,14 +134,15 @@ app.get("/logout", (req, res) => {
 // --------------------------
 // Participant Routes
 // --------------------------
-app.get("/seeparticipants", requireLogin, requireManager, async (req, res) => {
+app.get("/participants", requireLogin, requireManager, async (req, res) => {
   try {
-    const user = await db('participants').select('*').orderBy('participant_id', 'asc');
+    const user = await knex('participants').select('*').orderBy('participant_id', 'asc');
     
     // 2. ONLY render the page once, with the fetched data
     res.render('participantinfo/seeparticipants.ejs', { 
         participants: user, // Use a clear variable name like 'participants'
-        role: req.session.level // Pass user role to the view
+        role: req.session.user.role
+
     }); 
     
   } catch (err) {
@@ -149,8 +150,153 @@ app.get("/seeparticipants", requireLogin, requireManager, async (req, res) => {
     console.error('Error fetching users:', err);
     res.status(500).send('Error fetching user data: ' + err.message);
   }
-  // The original line 'res.render("participantinfo/seeparticipants.ejs");' is removed.
 });
+// Get route for adding participants
+app.get("/addparticipant", requireLogin, requireManager, (req, res) => {
+  res.render("participantinfo/addparticipant.ejs", { error: null });
+});
+
+// POST route for adding participants
+app.post("/addparticipant", async (req, res) => {
+  try {
+    const { email, password, first_name, last_name, dob, city, state, zip, school_or_employer, phone, role, field_of_interest } = req.body;
+
+    // 1. Hash password
+    const hashedPassword = await bcrypt.hash(password, 10); // 10 = salt rounds
+
+    // 2. Insert into the DB
+    await knex("participants").insert({
+      email,
+      password: hashedPassword,    // store hashed password
+      first_name,
+      last_name,
+      dob,
+      city,
+      state,
+      zip,
+      school_or_employer,
+      phone,
+      role,
+      field_of_interest
+    });
+
+    res.redirect("/participants");
+
+  } catch (err) {
+    console.error(err);
+    res.render("participantinfo/addparticipant.ejs", { error: "Error adding participant." });
+  }
+});
+app.post("/deleteparticipant/:id", requireLogin, requireManager, async (req, res) => {
+  const participantId = req.params.id;
+  try {
+    await knex("participants").where({ participant_id: participantId }).del();
+    res.redirect("/participants");
+  } catch (err) {
+    console.error("Error deleting participant:", err);
+    res.status(500).send("Error deleting participant.");
+  }
+});
+//Search route
+app.post('/searchparticipants', requireLogin, requireManager, async (req, res) => {
+  const UserSearch = req.body.UserSearch;
+
+  try {
+    const result = await knex('participants')
+      .select('*')
+      .where({ email: UserSearch })
+      .first();
+
+    if (result) {
+      res.render('participantinfo/participantresult.ejs', { user: result, found: true });
+    } else {
+      res.render('participantinfo/participantresult.ejs', { user: null, found: false, searchTerm: UserSearch });
+    }
+  } catch (err) {
+    console.error('Error searching users:', err);
+    res.status(500).send('Error searching for users');
+  }
+});
+
+// Result page
+app.get('/participantresult', requireLogin, requireManager, (req, res) => {
+  res.render('participantinfo/participantresult.ejs', { user: null, found: false });
+});
+//Edit page
+// Load edit form
+app.get("/editparticipant/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const user = await knex("participants").where({ participant_id: id }).first();
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Convert DOB into proper JS Date object if needed
+    user.dob = new Date(user.dob);
+
+    res.render("participantinfo/editparticipant.ejs", { user });
+  } catch (err) {
+    console.error("Error loading edit page:", err);
+    res.status(500).send("Error loading edit page");
+  }
+});
+// Update participant info
+app.post("/update/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const {
+      first_name,
+      last_name,
+      email,
+      dob,
+      city,
+      state,
+      zip,
+      school_or_employer,
+      phone,
+      role,
+      field_of_interest,
+      password // optional
+    } = req.body;
+
+    let updateData = {
+      first_name,
+      last_name,
+      email,
+      dob,
+      city,
+      state,
+      zip,
+      school_or_employer,
+      phone,
+      role,
+      field_of_interest
+    };
+
+    // Only update password if a new one is provided
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
+    }
+
+    await knex("participants")
+      .where({ participant_id: id })
+      .update(updateData);
+
+    res.redirect("/participants");
+
+  } catch (err) {
+    console.error("Error updating participant:", err);
+    res.status(500).send("Error updating participant");
+  }
+});
+
+
+
 // --------------------------
 // ERROR HANDLE 418 PAGE
 // --------------------------
