@@ -331,6 +331,37 @@ app.post("/update/:id", requireLogin, requireManager, async (req, res) => {
   }
 });
 
+// DONATION ROUTES
+
+app.get("/donations", requireLogin, async (req, res) => {
+  const success = req.query.success === "1";
+
+  res.render("donations/donations", {
+    user: req.session.user,
+    message: success ? "Donation recorded successfully!" : null
+  });
+});
+
+
+app.post("/donations", requireLogin, async (req, res) => {
+  const { amount } = req.body;
+
+  try {
+    const participantId = req.session.user.id; // ← comes from session
+
+    await knex("donations").insert({
+      participant_id: participantId,
+      amount,
+      donation_date: new Date()
+    });
+
+    res.redirect("/donations?success=1");
+  } catch (err) {
+    console.error("Error saving donation:", err);
+    res.status(500).send("Error saving donation");
+  }
+});
+
 
 
 // --------------------------
@@ -340,8 +371,41 @@ app.get("/teapot", (req, res) => {
   res.status(418).send("I'm a teapot ☕");
 });
 
+async function syncDonationSequence() {
+  try {
+    // Get the current max donation_id in the table
+    const result = await knex("donations").max("donation_id as max_id");
+    const maxId = result[0].max_id || 0;
+    const nextVal = maxId + 1;
+
+    // Bump the identity sequence so it doesn't collide
+    await knex.raw(
+      "SELECT setval('public.donations_donation_id_seq', ?, false);",
+      [nextVal]
+    );
+
+    console.log(`✅ donations_donation_id_seq synced to start at ${nextVal}`);
+  } catch (err) {
+    console.error("⚠️ Failed to sync donations sequence:", err);
+  }
+}
+
 // --------------------------
 // RUN SERVER
 // --------------------------
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
+async function startServer() {
+  try {
+    // Fix sequence on startup so inserts don't break
+    await syncDonationSequence();
+
+    app.listen(3000, () => {
+      console.log("Server running on port 3000");
+    });
+  } catch (err) {
+    console.error("Failed to start server:", err);
+    process.exit(1);
+  }
+}
+
+startServer();
+

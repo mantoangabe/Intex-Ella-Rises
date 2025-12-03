@@ -304,4 +304,22 @@ body {
   color: var(--dark) !important;
 }
 
+/* Donation page button — soft pastel style */
+.er-btn-donation {
+  background: var(--pink);
+  color: var(--dark);
+  padding: 0.7rem 1.8rem;
+  border-radius: 10px;
+  font-weight: 700;
+  border: 2px solid var(--pink-light);   /* thinner + softer border */
+  transition: 0.2s ease-in-out;
+}
+
+.er-btn-donation:hover {
+  background: var(--pink-medium);
+  border-color: var(--pink);             /* subtle deeper border on hover */
+  transform: scale(1.03);
+}
+
+
 
