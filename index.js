@@ -408,6 +408,273 @@ async function syncDonationSequence() {
     console.error("⚠️ Failed to sync donations sequence:", err);
   }
 }
+// Survey Routes
+
+// --------------------------
+// SURVEYS (POST-EVENT)
+// --------------------------
+app.get("/surveys", requireLogin, async (req, res) => {
+  try {
+    const search = req.query.search || "";
+    const loggedInId = req.session.user.id;
+    const isAdmin = req.session.user.role === "admin";
+
+    // Base query
+    let query = knex("surveys")
+      .join("registrations", "surveys.registration_id", "registrations.registration_id")
+      .join("participants", "surveys.participant_id", "participants.participant_id")
+      .join("event_occurrences", "registrations.event_occurrence_id", "event_occurrences.event_occurrence_id")
+      .join("event_templates", "event_occurrences.event_template_id", "event_templates.event_template_id")
+      .select(
+        "surveys.*",
+        "participants.first_name",
+        "participants.last_name",
+        "event_templates.event_name",
+        "event_occurrences.start_datetime"
+      );
+
+    // ⭐ NORMAL USER → ONLY THEIR SURVEYS
+    if (!isAdmin) {
+      query = query.where("surveys.participant_id", loggedInId);
+    }
+
+    // ⭐ SEARCH FILTER
+    if (search.trim() !== "") {
+      query = query.andWhere(builder =>
+        builder
+          .where("participants.first_name", "ILIKE", `%${search}%`)
+          .orWhere("participants.last_name", "ILIKE", `%${search}%`)
+          .orWhereRaw(
+            "participants.first_name || ' ' || participants.last_name ILIKE ?",
+            [`%${search}%`]
+          )
+          .orWhere("event_templates.event_name", "ILIKE", `%${search}%`)
+      );
+    }
+
+    const surveys = await query.orderBy("surveys.survey_id", "asc");
+
+    res.render("surveys/surveys.ejs", {
+      user: req.session.user,
+      surveys,
+      search
+    });
+
+  } catch (err) {
+    console.error("Survey list error:", err);
+    res.status(500).send("Error loading surveys");
+  }
+});
+
+
+
+// --------------------------
+// ADD SURVEY FORM (ADMIN OR USER)
+// --------------------------
+// --------------------------
+// ADD SURVEY FORM
+// --------------------------
+app.get("/surveys/add", requireLogin, async (req, res) => {
+  try {
+    const loggedInId = req.session.user.id;
+    const isAdmin = req.session.user.role === "admin";
+
+    let registrationsQuery = knex("registrations")
+      .join("participants", "registrations.participant_id", "participants.participant_id")
+      .join("event_occurrences", "registrations.event_occurrence_id", "event_occurrences.event_occurrence_id")
+      .join("event_templates", "event_occurrences.event_template_id", "event_templates.event_template_id")
+      .select(
+        "registrations.registration_id",
+        "participants.participant_id",
+        "participants.first_name",
+        "participants.last_name",
+        "event_templates.event_name",
+        "event_occurrences.start_datetime"
+      )
+      .orderBy("event_occurrences.start_datetime", "desc");
+
+    // If not admin → only show this user's registrations
+    if (!isAdmin) {
+      registrationsQuery = registrationsQuery.where("registrations.participant_id", loggedInId);
+    }
+
+    const registrations = await registrationsQuery;
+
+    let participantList = [];
+    if (isAdmin) {
+      participantList = await knex("participants")
+        .select("participant_id", "first_name", "last_name")
+        .orderBy("first_name", "asc")
+        .orderBy("last_name", "asc");
+    }
+
+    res.render("surveys/addSurvey.ejs", {
+      user: req.session.user,
+      registrations,
+      participantList,
+      error: null
+    });
+
+  } catch (err) {
+    console.error("Error loading survey form:", err);
+    res.status(500).send("Error loading survey form");
+  }
+});
+
+
+
+
+app.post("/surveys/add", requireLogin, async (req, res) => {
+  try {
+    const isAdmin = req.session.user.role === "admin";
+    const loggedInId = req.session.user.id;
+
+    const {
+      registration_id,
+      satisfaction_score,
+      usefulness_score,
+      instructor_score,
+      nps_bucket,
+      comments
+    } = req.body;
+
+    // ------------------------------------
+    // 1. Get participant_id FROM REGISTRATION
+    // ------------------------------------
+    const registration = await knex("registrations")
+      .where({ registration_id })
+      .first();
+
+    if (!registration) {
+      return res.status(400).send("Invalid registration.");
+    }
+
+    // Non-admins are only allowed to submit surveys for their own registrations
+    if (!isAdmin && registration.participant_id !== loggedInId) {
+      return res.status(400).send("Invalid registration for this user.");
+    }
+
+    const participant_id = registration.participant_id;
+
+    // ------------------------------------
+    // 2. VALIDATE SCORES
+    // ------------------------------------
+    const sat = Number(satisfaction_score);
+    const use = Number(usefulness_score);
+    const inst = Number(instructor_score);
+
+    if (![sat, use, inst].every(n => Number.isFinite(n) && n >= 1 && n <= 5)) {
+      return res.status(400).send("Scores must be integers between 1 and 5.");
+    }
+
+    const overall_score = (sat + use + inst) / 3;
+
+    // ------------------------------------
+    // 3. INSERT SURVEY
+    // ------------------------------------
+    await knex("surveys").insert({
+      registration_id,
+      participant_id,
+      satisfaction_score: sat,
+      usefulness_score: use,
+      instructor_score: inst,
+      overall_score,
+      nps_bucket,
+      comments: comments || "",
+      submission_date: new Date()
+    });
+
+    res.redirect("/surveys");
+
+  } catch (err) {
+    console.error("Add survey error:", err);
+    res.status(500).send("Error adding survey");
+  }
+});
+
+
+
+
+
+
+
+
+
+app.get("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
+  try {
+    const survey = await knex("surveys")
+      .where("survey_id", req.params.id)
+      .first();
+
+    if (!survey) return res.status(404).send("Survey not found");
+
+    res.render("surveys/editSurvey.ejs", {
+      user: req.session.user,
+      survey
+    });
+
+  } catch (err) {
+    console.error("Edit survey load error:", err);
+    res.status(500).send("Error loading edit page");
+  }
+});
+
+app.post("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
+  try {
+    const {
+      satisfaction_score,
+      usefulness_score,
+      instructor_score,
+      nps_bucket,
+      comments
+    } = req.body;
+
+    // Convert to numbers & compute average
+    const overall_score =
+      (Number(satisfaction_score) +
+       Number(usefulness_score) +
+       Number(instructor_score)) / 3;
+
+    await knex("surveys")
+      .where("survey_id", req.params.id)
+      .update({
+        satisfaction_score,
+        usefulness_score,
+        instructor_score,
+        overall_score,
+        nps_bucket,
+        comments
+      });
+
+    res.redirect("/surveys");
+
+  } catch (err) {
+    console.error("Survey update error:", err);
+    res.status(500).send("Error updating survey");
+  }
+});
+
+
+app.post("/surveys/delete/:id", requireLogin, requireManager, async (req, res) => {
+  try {
+    await knex("surveys")
+      .where("survey_id", req.params.id)
+      .del();
+
+    res.redirect("/surveys");
+  } catch (err) {
+    console.error("Survey delete error:", err);
+    res.status(500).send("Error deleting survey");
+  }
+});
+
+
+
+
+
+
+
+
 
 // --------------------------
 // RUN SERVER
