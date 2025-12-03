@@ -93,22 +93,22 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.render("login", { error_message: "Missing username or password" });
+    return res.render("auth/login", { error_message: "Missing username or password" });
   }
 
   try {
     const user = await knex("participants")
-      .select("email", "password", "role", "first_name", "id")
-      .where({ email: username })   // <--  match form username to DB email
+      .select("email", "password", "role", "first_name", "participant_id")
+      .where({ email: username })
       .first();
 
     if (!user) {
-      return res.render("login", { error_message: "Invalid login" });
+      return res.render("auth/login", { error_message: "Invalid login" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.render("login", { error_message: "Invalid login" });
+      return res.render("auth/login", { error_message: "Invalid login" });
     }
 
     req.session.isLoggedIn = true;
@@ -119,9 +119,10 @@ app.post("/login", async (req, res) => {
     res.redirect("/");
   } catch (err) {
     console.error("Login error:", err);
-    res.render("login", { error_message: "Invalid login" });
+    res.render("auth/login", { error_message: "Invalid login" });
   }
 });
+
 
 
 

@@ -27,6 +27,11 @@ body {
   padding: 0;
 }
 
+body2 {
+  background-color: #99B7C6;
+}
+
+
 h1, h2, h3, h4, h5 {
   font-family: 'DM Serif Display', serif;
   color: var(--black-dark);
