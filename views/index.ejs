@@ -4,74 +4,117 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ella Rises</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
 
-<header class="er-header">
+<!-- ==========================
+     NAVBAR
+=========================== -->
+<nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
 
-  <!-- Centered Logo -->
-  <div class="er-logo-wrap">
-    <img src="/images/ella.jpeg" alt="Ella Rises Logo" class="er-logo">
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+        <% if (!user) { %>
+          <li class="nav-item">
+            <a class="nav-link er-donate-btn" href="/login">Login</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/seeparticipants">Participants</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
+
+          <% if (user.role === "admin") { %>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/users">User Maintenance</a></li>
+          <% } %>
+
+          <li class="nav-item">
+            <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+
   </div>
-
-  <!-- Navigation -->
-<nav class="er-nav">
-  <ul>
-    <% if (!user) { %>
-      <!-- Visitor -->
-      <li><a href="/login">Login</a></li>
-    <% } else { %>
-      <!-- Logged-in users -->
-      <li><a href="/dashboard">Dashboard</a></li>
-      <li><a href="/logout">Logout</a></li>
-      <li><a href="/participants">Participants</a></li>
-      <li><a href="/surveys">Surveys</a></li>
-      <li><a href="/milestones">Milestones</a></li>
-      <li><a href="/donations">Donations</a></li>
-
-      <% if (user.role === "admin") { %>
-        <!-- Manager-only link -->
-        <li><a href="/users">User Maintenance</a></li>
-      <% } %>
-    <% } %>
-  </ul>
 </nav>
 
 
-</header>
+<!-- ==========================
+     HERO (REFERENCE STYLE)
+=========================== -->
+<section class="hero-wrapper">
 
-<!-- HERO -->
-<section class="er-about">
-  <div class="er-hero-overlay"></div>
-  <div class="er-hero-content">
-    <h1>Empowering Young Women to Rise</h1>
-    <p>Ella Rises uplifts young women through leadership, faith, education, community, and purpose.</p>
+  <!-- Top intro text -->
+  <h1 class="hero-title text-center">WELCOME TO</h1>
+
+  <!-- Circle images row -->
+  <div class="container d-flex justify-content-center gap-4 flex-wrap my-4 hero-circles">
+    <img src="/images/index_1.jpg" class="hero-circle-img">
+    <img src="/images/index_2.jpg" class="hero-circle-img">
+    <img src="/images/ella_2.jpeg" class="hero-circle-img">
+    <img src="/images/index_3.jpg" class="hero-circle-img">
+    <img src="/images/index_4.jpg" class="hero-circle-img">
+  </div>
+
+  <!-- Subtitle -->
+  <p class="hero-subtitle text-center">
+    Inviting young women to pursue higher education and embrace their heritage<br>
+    by providing culturally rooted programs and educational experiences.
+  </p>
+
+</section>
+
+
+<!-- ==========================
+     MAIN CTA AREA
+=========================== -->
+<section class="er-hero text-center">
+  <h2 class="hero-big-title">Empowering Young Women to Rise</h2>
+  <p class="hero-big-subtext">
+    Ella Rises uplifts young women through leadership, faith,<br>
+    education, community, and purpose.
+  </p>
+  <a href="/donations" class="er-support-btn">Support Us</a>
+</section>
+
+
+<!-- ==========================
+     MISSION CARD
+=========================== -->
+<section class="py-5">
+  <div class="container">
+    <div class="er-mission-card mx-auto text-center p-4 shadow">
+      <h2 class="fw-bold mb-3">Our Mission</h2>
+      <p>
+        Empowering young women to pursue higher education through high-impact multicultural activities 
+        focused on mariachi and STEAM.
+      </p>
+    </div>
   </div>
 </section>
 
-<!-- ABOUT SECTION -->
-<section class="er-about">
-  <h2>Our Mission</h2>
-  <p>
-    Empowering young women to pursue higher education through high-impact multicultural activities focused on mariachi and STEAM.
-  </p>
-</section>
 
-<!-- USER SECTION (manager-only buttons) -->
-<main class="er-main">
-  <% if (user && user.role === "admin") { %>
-    <div class="admin-buttons">
-      <a href="/users" class="er-btn">Manage Users</a>
-      <a href="/admin-settings" class="er-btn">Admin Settings</a>
-    </div>
-  <% } %>
-</main>
-
-<footer class="er-footer">
-  <p>&copy; 2025 Ella Rises — Empowering Young Women</p>
+<footer class="er-footer text-center py-3">
+  <p class="mb-0">© 2025 Ella Rises — Empowering Young Women</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

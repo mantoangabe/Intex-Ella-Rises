@@ -1,353 +1,307 @@
-/* ------------------------------
+/* ============================
    COLORS
------------------------------- */
+============================ */
 :root {
-  --blue-light: #99B7C6;
-  --purple-light: #978EC4;
-  --white: #F9F5EA;
+  --pink: #F4CFC9;
   --pink-light: #FFD8D1;
   --pink-medium: #F9AFB1;
-  --green-light: #9AB59D;
-  --black-dark: #3A3F3B;
-  --peach: #F4B092;
-  --red: #CE325B;
-  --superwhite : #ffffff;
-  --ellarises-pink: #F4CFC9;
+  --dark: #3A3F3B;
+  --white: #ffffff;
+  --blue-light: #99B7C6;
 }
 
-/* ------------------------------
-   FONTS
------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;700&family=TT+Milk+Script&display=swap');
-
+/* ============================
+   GLOBAL
+============================ */
 body {
+  background: #FFF9F7;
   font-family: 'Montserrat', sans-serif;
-  background-color: var(--white);
-  color: var(--black-dark);
+  color: var(--dark);
   margin: 0;
-  padding: 0;
 }
 
-
-h1, h2, h3, h4, h5 {
-  font-family: 'DM Serif Display', serif;
-  color: var(--black-dark);
+/* ============================
+   NAVBAR
+============================ */
+.er-nav {
+  background: var(--pink);
 }
 
-.logo {
-  font-family: 'TT Milk Script', cursive;
-  color: var(--black-dark);
-  font-size: 2.5rem;
+.er-logo-small {
+  height: 40px;
+  width: auto;
+  border-radius: 8px;
 }
 
-/* ------------------------------
-   HEADER
------------------------------- */
-header {
-  background-color: var(--pink-light);
-  padding: 2rem 1rem;
-  text-align: center;
+/* Buttons */
+.nav-btn {
+  background: var(--blue-light);
+  margin-left: .5rem;
+  padding: 6px 14px !important;
+  border-radius: 8px;
+  color: white !important;
+  transition: 0.2s ease;
 }
 
-/* ------------------------------
-   NAVIGATION
------------------------------- */
-nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+.nav-btn:hover {
+  background: var(--pink-medium);
+  color: var(--dark) !important;
 }
 
-nav a {
-  text-decoration: none;
-  color: var(--black-dark);
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background 0.3s ease;
+.logout-btn {
+  background: #CE325B !important;
 }
 
-nav a:hover {
-  background-color: var(--pink-medium);
-  color: var(--white);
+.logout-btn:hover {
+  background: #aa2a4b !important;
 }
 
-/* ------------------------------
-   MAIN CONTENT
------------------------------- */
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
-  text-align: center;
+/* HERO */
+.er-hero {
+  background: url('/images/hero-background.jpg') center/cover no-repeat;
+  min-height: 70vh;
+  position: relative;
+  padding-top: 4rem;
 }
 
-button {
-  font-family: 'Montserrat', sans-serif;
-  background-color: var(--green-light);
-  color: var(--white);
-  border: none;
-  padding: 0.7rem 1.5rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s ease;
+/* Light blue overlay */
+.er-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(153, 183, 198, 0.6); /* light blue overlay */
 }
 
-button:hover {
-  background-color: var(--peach);
-  color: var(--black-dark);
+/* Text and button on top of overlay */
+.er-hero .container {
+  position: relative;
+  z-index: 2;
+  color: var(--dark); /* keeps text readable on light blue */
 }
 
-/* ------------------------------
-   LOGIN FORM
------------------------------- */
-.login-form {
-  background-color: var(--pink-light);
-  padding: 2rem;
+/* Hero heading */
+.er-hero h1 {
+  font-size: 2.5rem; /* proportional size */
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+/* Hero paragraph */
+.er-hero p.lead {
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin: 0 auto 1.5rem auto;
+}
+
+/* Hero button */
+.er-btn {
+  background: var(--pink); /* keeps brand accent */
+  color: var(--dark);
+  padding: 0.8rem 2rem;
   border-radius: 10px;
-  max-width: 400px;
-  margin: 2rem auto;
-  box-shadow: 0 4px 8px rgba(58, 63, 59, 0.2);
+  font-weight: 700;
+  transition: 0.2s ease;
 }
 
-.login-form label {
-  font-weight: 600;
-  color: var(--black-dark);
+.er-btn:hover {
+  background: var(--pink-medium);
+  transform: scale(1.03);
+  color: var(--dark);
 }
 
-.login-form input {
-  width: 100%;
-  padding: 0.7rem;
-  border: 1px solid var(--blue-light);
-  border-radius: 5px;
-  font-family: 'Montserrat', sans-serif;
+/* ============================
+   MISSION CARD
+============================ */
+.er-mission-card {
+  background: var(--pink-light);
+  border-radius: 20px;
+  max-width: 700px;
 }
 
-.login-form input:focus {
-  outline: none;
-  border-color: var(--purple-light);
-  box-shadow: 0 0 5px var(--purple-light);
-}
-
-/* ------------------------------
-   ALERT MESSAGES
------------------------------- */
-.alert {
-  padding: 1rem;
-  margin: 1rem auto;
-  max-width: 400px;
-  border-radius: 5px;
-  font-weight: 600;
-}
-
-.alert-error {
-  background-color: var(--red);
-  color: var(--white);
-}
-
-.alert-success {
-  background-color: var(--green-light);
-  color: var(--white);
-}
-
-/* ------------------------------
-   FONTS
------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;700&family=TT+Milk+Script&display=swap');
-
-.logo {
-  font-family: 'TT Milk Script', cursive;
-  color: var(--black-dark);
-  font-size: 2.5rem;
-}
-
-/* ------------------------------
-   HEADER
------------------------------- */
-header {
-  background-color: var(--pink-light);
-  padding: 2rem 1rem;
-  text-align: center;
-}
-
-/* ------------------------------
-   NAVIGATION
------------------------------- */
-nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-nav a {
-  text-decoration: none;
-  color: var(--black-dark);
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  transition: background 0.3s ease;
-}
-
-nav a:hover {
-  background-color: var(--pink-medium);
-  color: var(--white);
-}
-
-/* ------------------------------
-   MAIN CONTENT
------------------------------- */
-main {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 1rem;
-  text-align: center;
-}
-
-button {
-  font-family: 'Montserrat', sans-serif;
-  background-color: var(--blue-light);
-  color: var(--white);
-  border: none;
-  padding: 0.7rem 1.5rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
-
-button:hover {
-  background-color: var(--ellarises-pink);
-  color: var(--black-dark);
-}
-
-/* ------------------------------
+/* ============================
    FOOTER
------------------------------- */
-footer {
-  background-color: var(--ellarises-pink); /* removes blue block */
+============================ */
+.er-footer {
+  background: var(--pink);
+  color: var(--dark);
+  font-weight: 600;
   text-align: center;
   padding: 1.5rem;
-  color: var(--black-dark);
-  margin-top: 2rem;
-  margin: 0;
-  font-size: 1rem;
+  margin-top: 3rem;
 }
 
+/* ============================
+   LOGIN PAGE
+============================ */
+.login-page {
+  background-color: var(--blue-light);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-/* ------------------------------
-   LOGIN CARD
------------------------------- */
+.er-header-small {
+  background-color: var(--pink-light);
+  padding: 20px 0;
+  text-align: center;
+}
+
+/* CENTER LOGO ON LOGIN PAGE */
+.er-logo-wrap img {
+  width: 160px;          /* <<< MUCH smaller */
+  border-radius: 12px;
+}
+
+/* centers login content */
+.login-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+/* login card */
 .login-card {
   background-color: var(--white);
-  border: 1px solid var(--blue-light);
-  border-radius: 12px;          /* Rounded corners */
-  max-width: 400px;
-  margin: 5rem auto;            /* Center horizontally with margin */
-  padding: 2rem;
-  box-shadow: 0 6px 12px rgba(58, 63, 59, 0.15); /* Subtle shadow */
-  text-align: center;
+  border-radius: 18px;
+  padding: 2.2rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 5px 18px rgba(0,0,0,0.12);
+  animation: fadeIn 0.3s ease;
 }
 
 .login-card h1 {
-  margin-bottom: 0.5rem;
-  color: var(--black-dark);
-}
-
-.login-card p {
+  text-align: center;
   margin-bottom: 1.5rem;
-  color: var(--black-dark);
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  color: var(--dark);
 }
 
-.login-card .form-group {
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-.login-card label {
+/* Form styling */
+.form-group label {
   font-weight: 600;
-  display: block;
-  margin-bottom: 0.3rem;
 }
 
-.login-card input {
+.form-group input {
   width: 100%;
-  padding: 0.7rem;
-  border: 1px solid var(--blue-light);
-  border-radius: 5px;
-  font-family: 'Montserrat', sans-serif;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: .3rem;
 }
 
-.login-card input:focus {
-  outline: none;
-  border-color: var(--purple-light);
-  box-shadow: 0 0 5px var(--purple-light);
-}
-
-.signup-link {
+.login-card button {
   margin-top: 1rem;
-  font-size: 0.9rem;
+  background: var(--pink-medium);
+  border: none;
+  width: 100%;
+  padding: .8rem;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: 0.2s;
 }
 
-.signup-link a {
-  color: var(--purple-light);
+.login-card button:hover {
+  background: var(--pink-light);
+  color: var(--dark);
+}
+
+/* cute fade */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* ---------------------------------------
+   Reference Site Style Recreation
+---------------------------------------- */
+
+/* Top welcome section background */
+.hero-wrapper {
+  background: var(--pink);
+  padding: 3rem 1rem 4rem 1rem;
+}
+
+/* “WELCOME TO” */
+.hero-title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 2rem;
+}
+
+/* Circle images */
+.hero-circle-img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  transition: 0.2s ease;
+}
+
+.hero-circle-img:hover {
+  transform: scale(1.03);
+}
+
+/* Subtitle under circles */
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--dark);
+  max-width: 850px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Main blue section with title */
+.er-hero {
+  background: var(--blue-light);
+  padding: 4rem 1rem;
+}
+
+.hero-big-title {
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.hero-big-subtext {
+  font-size: 1.2rem;
+  margin: 1rem auto 2rem auto;
+  max-width: 700px;
+}
+
+/* Support button (should match reference Donate button style) */
+.er-support-btn {
+  display: inline-block;
+  background: var(--pink);
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  font-weight: bold;
   text-decoration: none;
+  color: var(--dark);
+  transition: 0.2s ease;
+}
+
+.er-support-btn:hover {
+  background: var(--pink-medium);
+  transform: scale(1.05);
+}
+
+/* Donate / Login button in navbar (reference pastel pill) */
+.er-donate-btn {
+  background: var(--blue-light);
+  padding: 6px 18px;
+  border-radius: 14px;
+  color: white !important;
   font-weight: 600;
 }
 
-.signup-link a:hover {
-  color: var(--pink-medium);
+.er-donate-btn:hover {
+  background: var(--pink-medium);
+  color: var(--dark) !important;
 }
 
-/* HEADER BACKGROUND */
-.er-header {
-  background-color: #F4CFC9; /* Ella Rises pink */
-  text-align: center;
-  padding: 40px 0 20px;
-}
 
-/* LOGO STYLING — NICE + SMALLER */
-.er-logo-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 30px;
-  background-color: #f4cfc9;
-}
-
-.er-logo {
-  height: 170px;        /* same size as your screenshot */
-  width: auto;
-  border-radius: 20px;
-  padding: 15px;
-  background-color: #F4CFC9;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15); /* soft glow */
-}
-
-/* NAV BELOW LOGO */
-.er-nav ul {
-  list-style: none;
-  display: flex;
-  justify-content: center;
-  gap: 4rem;
-  padding: 0;
-  margin: 0;
-}
-
-.er-nav a {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #333;
-  text-decoration: none;
-}
-
-.er-nav a:hover {
-  color: #000;
-}
-
-.er-about {
-  text-align: center;
-}
