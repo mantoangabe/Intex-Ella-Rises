@@ -319,7 +319,7 @@ app.get("/donations", requireLogin, async (req, res) => {
 
   res.render("donations/donations", {
     user: req.session.user,
-    message: success ? "Donation recorded successfully!" : null
+    message: success ? "Donation recorded successfully! Thank you for your generosity!" : null
   });
 });
 
