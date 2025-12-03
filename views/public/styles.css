@@ -12,6 +12,7 @@
   --peach: #F4B092;
   --red: #CE325B;
   --superwhite : #ffffff;
+  --ellarises-pink: #F4CFC9;
 }
 
 /* ------------------------------
@@ -25,10 +26,6 @@ body {
   color: var(--black-dark);
   margin: 0;
   padding: 0;
-}
-
-body2 {
-  background-color: #99B7C6;
 }
 
 
@@ -104,17 +101,6 @@ button:hover {
   color: var(--black-dark);
 }
 
-/* ------------------------------
-   FOOTER
------------------------------- */
-footer {
-  background-color: var(--pink-medium);
-  text-align: center;
-  padding: 1.5rem;
-  color: var(--white);
-  margin-top: 2rem;
-  font-size: 0.9rem;
-}
 /* ------------------------------
    LOGIN FORM
 ------------------------------ */
@@ -166,38 +152,11 @@ footer {
   background-color: var(--green-light);
   color: var(--white);
 }
-/* ------------------------------
-   COLORS
------------------------------- */
-:root {
-  --blue-light: #99B7C6;
-  --purple-light: #978EC4;
-  --white: #F9F5EA;
-  --pink-light: #FFD8D1;
-  --pink-medium: #F9AFB1;
-  --green-light: #9AB59D;
-  --black-dark: #3A3F3B;
-  --peach: #F4B092;
-  --red: #CE325B;
-}
 
 /* ------------------------------
    FONTS
 ------------------------------ */
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Montserrat:wght@400;700&family=TT+Milk+Script&display=swap');
-
-body {
-  font-family: 'Montserrat', sans-serif;
-  background-color: var(--white);
-  color: var(--black-dark);
-  margin: 0;
-  padding: 0;
-}
-
-h1, h2, h3, h4, h5 {
-  font-family: 'DM Serif Display', serif;
-  color: var(--black-dark);
-}
 
 .logo {
   font-family: 'TT Milk Script', cursive;
@@ -251,7 +210,7 @@ main {
 
 button {
   font-family: 'Montserrat', sans-serif;
-  background-color: var(--green-light);
+  background-color: var(--blue-light);
   color: var(--white);
   border: none;
   padding: 0.7rem 1.5rem;
@@ -262,7 +221,7 @@ button {
 }
 
 button:hover {
-  background-color: var(--peach);
+  background-color: var(--ellarises-pink);
   color: var(--black-dark);
 }
 
@@ -270,12 +229,13 @@ button:hover {
    FOOTER
 ------------------------------ */
 footer {
-  background-color: var(--pink-medium);
+  background-color: var(--ellarises-pink); /* removes blue block */
   text-align: center;
   padding: 1.5rem;
-  color: var(--white);
+  color: var(--black-dark);
   margin-top: 2rem;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 1rem;
 }
 
 
@@ -355,6 +315,7 @@ footer {
   display: flex;
   justify-content: center;
   margin-bottom: 30px;
+  background-color: #f4cfc9;
 }
 
 .er-logo {
