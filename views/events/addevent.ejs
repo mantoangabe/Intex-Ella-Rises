@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Event</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="bg-light custom-bg">
+
+  <!-- 🔥 YOUR EXISTING NAVBAR (unchanged) -->
+  <nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+        <% if (!user) { %>
+          <li class="nav-item"><a class="nav-link er-donate-btn" href="/login">Login</a></li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn active" href="/events">Events</a></li>
+
+          <% if (user.role === "admin" || user.role === "manager") { %>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
+          <% } %>
+
+          <li class="nav-item"><a class="nav-link nav-btn logout-btn" href="/logout">Logout</a></li>
+        <% } %>
+      </ul>
+    </div>
+
+  </div>
+</nav>
+  <!-- END NAVBAR -->
+
+  <div class="container mt-4">
+
+    <div class="text-center mb-3">
+      <a href="/events" class="btn btn-secondary">← Back to Events</a>
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header custom-nav-color text-white">
+        <h5 class="mb-0">Add New Event</h5>
+      </div>
+
+      <div class="card-body">
+
+        <form action="/addevent" method="POST">
+
+          <!-- TEMPLATE SELECT -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Event Template</label>
+            <select class="form-select" name="event_template_id" id="templateSelect">
+              <option value="">-- None --</option>
+
+              <% templates.forEach(t => { %>
+                <option value="<%= t.event_template_id %>"
+                  data-name="<%= t.event_name || '' %>"
+                  data-description="<%= t.description || '' %>"
+                  data-capacity="<%= t.default_capacity || '' %>">
+                  <%= t.event_name %> (Type: <%= t.event_type %>)
+                </option>
+              <% }) %>
+
+            </select>
+          </div>
+
+          <!-- Event Name -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Event Name</label>
+            <input id="eventName" type="text" class="form-control" name="event_name" required>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Description</label>
+            <textarea id="description" class="form-control" name="description" rows="2"></textarea>
+          </div>
+
+          <!-- Capacity -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Capacity</label>
+            <input id="capacity" type="number" class="form-control" name="capacity" min="1" required>
+          </div>
+
+          <!-- Start -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Start Date & Time</label>
+            <input type="datetime-local" class="form-control" name="start_datetime" required>
+          </div>
+
+          <!-- End -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">End Date & Time</label>
+            <input type="datetime-local" class="form-control" name="end_datetime" required>
+          </div>
+
+          <!-- Location -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Location</label>
+            <input type="text" class="form-control" name="location" required>
+          </div>
+
+          <!-- Registration Deadline -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Registration Deadline</label>
+            <input type="datetime-local" class="form-control" name="registration_deadline">
+          </div>
+
+          <button class="er-btn w-100">Add Event</button>
+
+
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 🔥 AUTOFILL SCRIPT -->
+
+    <script nonce="<%= nonce %>">
+  console.log("🔥 AUTOFILL SCRIPT LOADED");
+
+  document.getElementById("templateSelect").addEventListener("change", function () {
+    const opt = this.selectedOptions[0];
+    if (!opt || !opt.value) return;
+
+    console.log("Template loaded:", opt.dataset);
+
+    document.getElementById("eventName").value = opt.dataset.name || "";
+    document.getElementById("description").value = opt.dataset.description || "";
+    document.getElementById("capacity").value = opt.dataset.capacity || "";
+  });
+</script>
+
+ 
+
+</body>
+</html>

@@ -6,6 +6,7 @@ const knexLib = require("knex");
 const KnexSessionStore = require("connect-session-knex")(session);
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const crypto = require("crypto");
 
 
 
@@ -30,7 +31,35 @@ const knex = require("knex")({
 // --------------------------
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(helmet());
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString("base64");
+  next();
+});
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          (req, res) => `'nonce-${res.locals.nonce}'`,
+          "https://cdn.jsdelivr.net"    // allow Bootstrap JS
+        ],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",            // Bootstrap needs this
+          "https://cdn.jsdelivr.net"
+        ],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  })
+);
+
 
 app.use(
   session({
@@ -319,42 +348,10 @@ app.get("/donations", requireLogin, async (req, res) => {
 
   res.render("donations/donations", {
     user: req.session.user,
-    message: success ? "Donation recorded successfully! Thank you for your generosity!" : null
-  });
-});
-
-
-app.post("/donations", requireLogin, async (req, res) => {
-  const { amount } = req.body;
-
-  try {
-    const participantId = req.session.user.id; // ← comes from session
-
-    await knex("donations").insert({
-      participant_id: participantId,
-      amount,
-      donation_date: new Date()
-    });
-
-    res.redirect("/donations?success=1");
-  } catch (err) {
-    console.error("Error saving donation:", err);
-    res.status(500).send("Error saving donation");
-  }
-});
-
-// DONATION ROUTES
-
-app.get("/donations", requireLogin, async (req, res) => {
-  const success = req.query.success === "1";
-
-  res.render("donations/donations", {
-    user: req.session.user,
     message: success ? "Donation recorded successfully!" : null
   });
 });
 
-
 app.post("/donations", requireLogin, async (req, res) => {
   const { amount } = req.body;
 
@@ -373,15 +370,6 @@ app.post("/donations", requireLogin, async (req, res) => {
     res.status(500).send("Error saving donation");
   }
 });
-
-// Get route for Tableau dashboard
-app.get("/dashboard", requireLogin, requireManager, (req, res) => {
-  res.render("dashboard/dashboard.ejs", { 
-    user: req.session.user,
-    error: null
-  });
-});
-
 
 // --------------------------
 // ERROR HANDLE 418 PAGE
@@ -408,7 +396,207 @@ async function syncDonationSequence() {
     console.error("⚠️ Failed to sync donations sequence:", err);
   }
 }
+// =======================================================
+// EVENTS MANAGEMENT ROUTES
+// =======================================================
 
+// Show all events
+app.get("/events", requireLogin, async (req, res) => {
+  try {
+    const limit = 25;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const events = await knex("event_occurrences as eo")
+      .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+      .select(
+        "eo.event_occurrence_id",
+        "eo.event_name",
+        "eo.start_datetime",
+        "eo.end_datetime",
+        "eo.location",
+        "eo.capacity",
+        "eo.registration_deadline",
+        "eo.event_template_id",
+        "et.event_name as template_name",
+        "et.event_type"
+      )
+      .orderBy("eo.start_datetime", "asc")
+      .limit(limit)
+      .offset(offset);
+
+    // Count total number of events
+    const [{ count }] = await knex("event_occurrences").count("* as count");
+
+    const hasMore = offset + limit < count;
+
+    res.render("events/events", {
+      user: req.session.user,
+      events,
+      offset,
+      limit,
+      hasMore
+    });
+
+  } catch (err) {
+    console.error("Error loading events:", err);
+    res.status(500).send("Error loading events");
+  }
+});
+
+// GET add event page
+app.get("/addevent", requireLogin, requireManager, async (req, res) => {
+  try {
+    const templates = await knex("event_templates").select("*");
+    res.render("events/addevent", {
+      user: req.session.user,
+      templates
+    });
+  } catch (err) {
+    console.error("Error loading add event page:", err);
+    res.status(500).send("Error loading add event page.");
+  }
+});
+
+// POST create event
+app.post("/addevent", requireLogin, requireManager, async (req, res) => {
+  try {
+    const data = req.body;
+
+    await knex("event_occurrences").insert({
+      event_name: data.event_name,
+      start_datetime: data.start_datetime,
+      end_datetime: data.end_datetime,
+      location: data.location,
+      capacity: data.capacity,
+      registration_deadline: data.registration_deadline || null,
+      event_template_id: data.event_template_id || null
+    });
+
+    res.redirect("/events");
+
+  } catch (err) {
+    console.error("Error adding event:", err);
+    res.status(500).send("Error adding event: " + err.message);
+  }
+});
+
+// GET edit event
+app.get("/editevent/:id", requireLogin, requireManager, async (req, res) => {
+  try {
+    const event = await knex("event_occurrences")
+      .where("event_occurrence_id", req.params.id)
+      .first();
+
+    const templates = await knex("event_templates").select("*");
+
+    res.render("events/editevent", {
+      user: req.session.user,
+      event,
+      templates
+    });
+
+  } catch (err) {
+    console.error("Error loading event edit:", err);
+    res.status(500).send("Error loading edit page");
+  }
+});
+
+// POST edit event
+app.post("/editevent/:id", requireLogin, requireManager, async (req, res) => {
+  try {
+    const data = req.body;
+
+    await knex("event_occurrences")
+      .where("event_occurrence_id", req.params.id)
+      .update({
+        event_name: data.event_name,
+        start_datetime: data.start_datetime,
+        end_datetime: data.end_datetime,
+        location: data.location,
+        capacity: data.capacity,
+        registration_deadline: data.registration_deadline || null,
+        event_template_id: data.event_template_id || null
+      });
+
+    res.redirect("/events");
+
+  } catch (err) {
+    console.error("Error saving event:", err);
+    res.status(500).send("Error saving event");
+  }
+});
+
+// DELETE event
+app.post("/deleteevent/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    // 1. Delete surveys linked to registrations for this event
+    await knex("surveys")
+      .whereIn("registration_id", function () {
+        this.select("registration_id")
+          .from("registrations")
+          .where("event_occurrence_id", id);
+      })
+      .del();
+
+    // 2. Delete registrations linked to this event
+    await knex("registrations")
+      .where({ event_occurrence_id: id })
+      .del();
+
+    // 3. Delete the event
+    await knex("event_occurrences")
+      .where({ event_occurrence_id: id })
+      .del();
+
+    res.redirect("/events");
+
+  } catch (err) {
+    console.error("Error deleting event:", err);
+    res.status(500).send("Error deleting event");
+  }
+});
+
+
+
+// SEARCH events
+app.post("/searchevents", requireLogin, async (req, res) => {
+  try {
+    const q = req.body.EventSearch;
+
+    const events = await knex("event_occurrences as eo")
+      .leftJoin("event_templates as et", "eo.event_template_id", "et.event_template_id")
+      .whereILike("eo.event_name", `%${q}%`)
+      .orWhereILike("eo.location", `%${q}%`)
+      .orWhereILike("et.event_name", `%${q}%`)
+      .select(
+        "eo.event_occurrence_id",
+        "eo.event_name",
+        "eo.start_datetime",
+        "eo.end_datetime",
+        "eo.location",
+        "eo.capacity",
+        "eo.registration_deadline",
+        "eo.event_template_id",
+        "et.event_name as template_name",
+        "et.event_type"
+      )
+      .orderBy("eo.start_datetime", "asc");
+
+    res.render("events/events", {
+      user: req.session.user,
+      events
+    });
+
+  } catch (err) {
+    console.error("Error searching events:", err);
+    res.status(500).send("Error searching events");
+  }
+});
+app.get("/debug", (req, res) => {
+  res.json(req.session.user);
+});
 // --------------------------
 // RUN SERVER
 // --------------------------
