@@ -179,7 +179,13 @@ app.get("/participants", requireLogin, requireManager, async (req, res) => {
   }
 });
 
-
+// Get route for Tableau dashboard
+app.get("/dashboard", requireLogin, requireManager, (req, res) => {
+  res.render("dashboard/dashboard.ejs", { 
+    user: req.session.user,
+    error: null
+  });
+});
 
 // Get route for adding participants
 app.get("/addparticipant", requireLogin, requireManager, (req, res) => {
