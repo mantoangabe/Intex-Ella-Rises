@@ -8,44 +8,58 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="bg-light">
+<body class="bg-light custom-bg">
 <header class="er-header">
-  <!-- Centered Logo -->
-  <div class="er-logo-wrap">
-    <img src="/images/ella.jpeg" alt="Ella Rises Logo" class="er-logo">
-  </div>
+<!-- ==========================
+     NAVBAR
+=========================== -->
+<nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
 
-  <!-- Navigation -->
-  <nav class="er-nav">
-    <ul>
-      <% if (!user) { %>
-        <!-- Visitor -->
-        <li><a href="/login">Login</a></li>
-      <% } else { %>
-        <!-- Logged-in users -->
-        <li><a href="/dashboard">Dashboard</a></li>
-        <li><a href="/logout">Logout</a></li>
-        <li><a href="/participants">Participants</a></li>
-        <li><a href="/surveys">Surveys</a></li>
-        <li><a href="/milestones">Milestones</a></li>
-        <li><a href="/donations">Donations</a></li>
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
 
-        <% if (user.role === "admin") { %>
-          <!-- Admin-only link -->
-          <li><a href="/users">User Maintenance</a></li>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+
+        <% if (!user) { %>
+          <li class="nav-item">
+            <a class="nav-link er-donate-btn" href="/login">Login</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
+          <li class="nav-item"><a class="nav-link nav-btn" href="/events">Events</a></li>
+
+          <% if (user.role === "admin") { %>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
+            <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
+          <% } %>
+
+          <li class="nav-item">
+            <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
+          </li>
         <% } %>
-      <% } %>
-    </ul>
-  </nav>
-</header>
+      </ul>
+    </div>
 
+  </div>
+</nav>
 
 <% if (user && user.role === "admin") { %>
 <div class="container">
   <div class="row mb-4 justify-content-center">   
     <div class="col-4">
       <div class="text-center">
-        <a href="/addparticipant" class="btn btn-danger btn-lg" role="button">Add User</a>            
+        <a href="/addparticipant" class="nav-link nav-btn logout-btn" style="margin-top: 20px;" role="button">Add User</a>            
       </div>
     </div>
   </div>
@@ -56,8 +70,8 @@
   <div class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0"><i class="bi bi-search"></i> Search Users</h5>
+        <div class="card-header custom-nav-color bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-search "></i> Search Users</h5>
         </div>
         <div class="card-body">
           <form action="/searchparticipants" method="POST">
@@ -82,7 +96,7 @@
   <div class="row">
     <div class="col-12">
       <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header custom-nav-color bg-primary text-white">
           <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Users</h5>
         </div>
         <div class="card-body p-0">
