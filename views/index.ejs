@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,23 +16,28 @@
     <img src="/images/ella.jpeg" alt="Ella Rises Logo" class="er-logo">
   </div>
 
-  <!-- Navigation BELOW logo -->
-  <nav class="er-nav">
-    <ul>
+  <!-- Navigation -->
+<nav class="er-nav">
+  <ul>
+    <% if (!user) { %>
+      <!-- Visitor -->
+      <li><a href="/login">Login</a></li>
+    <% } else { %>
+      <!-- Logged-in users -->
+      <li><a href="/dashboard">Dashboard</a></li>
+      <li><a href="/logout">Logout</a></li>
       <li><a href="/participants">Participants</a></li>
       <li><a href="/surveys">Surveys</a></li>
       <li><a href="/milestones">Milestones</a></li>
       <li><a href="/donations">Donations</a></li>
-      <% if (user) { %>
-        <li><a href="/dashboard">Dashboard</a></li>
-      <% } else { %>
-        <li><a href="/login">Login</a></li>
+
+      <% if (user.role === "admin") { %>
+        <!-- Manager-only link -->
+        <li><a href="/users">User Maintenance</a></li>
       <% } %>
-    </ul>
-  </nav>
-
-</header>
-
+    <% } %>
+  </ul>
+</nav>
 
 
 </header>
@@ -44,9 +48,6 @@
   <div class="er-hero-content">
     <h1>Empowering Young Women to Rise</h1>
     <p>Ella Rises uplifts young women through leadership, faith, education, community, and purpose.</p>
-
-    
-    
   </div>
 </section>
 
@@ -58,9 +59,14 @@
   </p>
 </section>
 
-<!-- USER SECTION -->
+<!-- USER SECTION (manager-only buttons) -->
 <main class="er-main">
-  
+  <% if (user && user.role === "admin") { %>
+    <div class="admin-buttons">
+      <a href="/users" class="er-btn">Manage Users</a>
+      <a href="/admin-settings" class="er-btn">Admin Settings</a>
+    </div>
+  <% } %>
 </main>
 
 <footer class="er-footer">

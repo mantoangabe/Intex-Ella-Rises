@@ -110,11 +110,11 @@ app.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.render("auth/login", { error_message: "Invalid login" });
     }
-
-    req.session.isLoggedIn = true;
-    req.session.username = user.first_name;
-    req.session.role = user.role;
-    req.session.id = user.id;
+    req.session.user = {
+      id: user.participant_id,
+      name: user.first_name,
+      role: user.role
+    };
 
     res.redirect("/");
   } catch (err) {
@@ -122,6 +122,7 @@ app.post("/login", async (req, res) => {
     res.render("auth/login", { error_message: "Invalid login" });
   }
 });
+
 
 
 
