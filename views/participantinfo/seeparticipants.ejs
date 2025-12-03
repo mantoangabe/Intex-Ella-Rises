@@ -6,135 +6,156 @@
     <title>User Database</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="bg-light">
-        <nav class="navbar navbar-dark bg-primary mb-4">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">
-                <i class="bi bi-fire"></i> View Participants
-                <br>
-                
-            </span>
-        </div>
-    </nav>
-<% if ( role ==="admin" ) { %>
+<header class="er-header">
+  <!-- Centered Logo -->
+  <div class="er-logo-wrap">
+    <img src="/images/ella.jpeg" alt="Ella Rises Logo" class="er-logo">
+  </div>
+
+  <!-- Navigation -->
+  <nav class="er-nav">
+    <ul>
+      <% if (!user) { %>
+        <!-- Visitor -->
+        <li><a href="/login">Login</a></li>
+      <% } else { %>
+        <!-- Logged-in users -->
+        <li><a href="/dashboard">Dashboard</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="/participants">Participants</a></li>
+        <li><a href="/surveys">Surveys</a></li>
+        <li><a href="/milestones">Milestones</a></li>
+        <li><a href="/donations">Donations</a></li>
+
+        <% if (user.role === "admin") { %>
+          <!-- Admin-only link -->
+          <li><a href="/users">User Maintenance</a></li>
+        <% } %>
+      <% } %>
+    </ul>
+  </nav>
+</header>
+
+
+<% if (user && user.role === "admin") { %>
 <div class="container">
-    <div class="row mb-4 justify-content-center">   
-        <div class="col-4">
-            <div class="text-center">
-                <a href="/addparticipant" class="btn btn-danger btn-lg" role="button">Add User</a>            
-            </div>
-        </div>
+  <div class="row mb-4 justify-content-center">   
+    <div class="col-4">
+      <div class="text-center">
+        <a href="/addparticipant" class="btn btn-danger btn-lg" role="button">Add User</a>            
+      </div>
     </div>
+  </div>
 </div>
-<% } %> 
+<% } %>
 
-
-
-
-
-
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-search"></i> Search Users</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="/searchparticipants" method="POST">
-                            <div class="input-group">
-                                <input 
-                                    type="text" 
-                                    name="UserSearch" 
-                                    class="form-control form-control-lg" 
-                                    placeholder="Enter email..." 
-                                    required
-                                >
-                                <button class="btn btn-dark btn-lg" type="submit">
-                                    <i class="bi bi-search"></i> Search
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+<div class="container">
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-search"></i> Search Users</h5>
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Users</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>UserID</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Date of Birth</th>
-                                        <th>Phone</th>
-                                        <th>City</th>
-                                        <th>City/Employer</th>
-                                        <th>Interests</th>
-                                        <% if ( role ==="admin" ) { %><th>Actions</th><% } %>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% participants.forEach(u => { %>
-                                        <tr>
-                                            <td class="fw-bold"><%= u.participant_id %></td>
-                                            <td class="fw-bold"><%=u.first_name %></td>
-                                            <td class="fw-bold"><%=u.last_name %></td>
-                                            <td class="fw-bold"><%=u.email %></td>
-                                            <td class="fw-bold"><%=u.role %></td>
-                                            <td class="fw-bold"><% let dateDisplay = u.dob;
-                                                if (dateDisplay instanceof Date) {
-                                                dateDisplay = dateDisplay.toISOString().split('T')[0];
-                                                } else if (typeof dateDisplay === 'string') {
-                                                dateDisplay = dateDisplay.split('T')[0];
-                                                }
-                                                %>
-
-                                                <%= dateDisplay %></td>
-                                            <td class="fw-bold"><%=u.phone %></td>
-                                            <td class="fw-bold"><%=u.city %></td>
-                                            <td class="fw-bold"><%=u.school_or_employer %></td>
-                                            <td class="fw-bold"><%=u.field_of_interest %></td>
-                                            <% if ( role === "admin" ) { %><td>
-                                                <form action="/deleteparticipant/<%= u.participant_id %>"
-                                                      method="POST" 
-                                                      style="display:inline;"
-                                                      onsubmit="return confirm('Are you sure you want to delete this user?');">                                      
-                                                    <button type="submit" class="btn btn-danger btn-sm">
-                                                        <i class="bi bi-trash"></i> Delete
-                                                    </button>
-                                                </form>
-                                                
-                                                <form>
-                                                    <a href="/editparticipant/<%= u.participant_id %>" class="btn btn-success btn-sm">
-                                                    <i class="bi bi-pencil"></i> Edit
-                                                    </a>
-                                                </form> 
-                                            </td>
-                                            <% } %>
-                                        </tr>
-
-                                    <% }); %>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+        <div class="card-body">
+          <form action="/searchparticipants" method="POST">
+            <div class="input-group">
+              <input 
+                type="text" 
+                name="UserSearch" 
+                class="form-control form-control-lg" 
+                placeholder="Enter email..." 
+                required
+              >
+              <button class="btn btn-dark btn-lg" type="submit">
+                <i class="bi bi-search"></i> Search
+              </button>
             </div>
+          </form>
         </div>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="bi bi-list-ul"></i> All Users</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>UserID</th>
+                  <th>First Name</th>
+                  <th>Last Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Date of Birth</th>
+                  <th>Phone</th>
+                  <th>City</th>
+                  <th>School/Employer</th>
+                  <th>Interests</th>
+                  <% if (user && user.role === "admin") { %>
+                    <th>Actions</th>
+                  <% } %>
+                </tr>
+              </thead>
+              <tbody>
+                <% participants.forEach(u => { %>
+                  <tr>
+                    <td class="fw-bold"><%= u.participant_id %></td>
+                    <td class="fw-bold"><%= u.first_name %></td>
+                    <td class="fw-bold"><%= u.last_name %></td>
+                    <td class="fw-bold"><%= u.email %></td>
+                    <td class="fw-bold"><%= u.role %></td>
+                    <td class="fw-bold">
+                      <% 
+                        let dateDisplay = u.dob;
+                        if (dateDisplay instanceof Date) {
+                          dateDisplay = dateDisplay.toISOString().split('T')[0];
+                        } else if (typeof dateDisplay === 'string') {
+                          dateDisplay = dateDisplay.split('T')[0];
+                        }
+                      %>
+                      <%= dateDisplay %>
+                    </td>
+                    <td class="fw-bold"><%= u.phone %></td>
+                    <td class="fw-bold"><%= u.city %></td>
+                    <td class="fw-bold"><%= u.school_or_employer %></td>
+                    <td class="fw-bold"><%= u.field_of_interest %></td>
+                    <% if (user && user.role === "admin") { %>
+                      <td>
+                        <form 
+                          action="/deleteparticipant/<%= u.participant_id %>"
+                          method="POST" 
+                          style="display:inline;"
+                          onsubmit="return confirm('Are you sure you want to delete this user?');">
+                          <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                          </button>
+                        </form>
+                        
+                        <a href="/editparticipant/<%= u.participant_id %>" class="btn btn-success btn-sm">
+                          <i class="bi bi-pencil"></i> Edit
+                        </a>
+                      </td>
+                    <% } %>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
