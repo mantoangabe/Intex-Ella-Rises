@@ -312,6 +312,13 @@ app.post("/update/:id", requireLogin, requireManager, async (req, res) => {
   }
 });
 
+// Get route for Tableau dashboard
+app.get("/dashboard", requireLogin, requireManager, (req, res) => {
+  res.render("dashboard/dashboard.ejs", { 
+    user: req.session.user,
+    error: null
+  });
+});
 
 
 // --------------------------
