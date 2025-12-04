@@ -158,16 +158,37 @@
         </div>
 
         <!-- ==========================
-             PAGINATION
+             PAGINATION (MATCHED STYLE)
         =========================== -->
-        <div class="card-footer text-center">
-          <nav>
-            <ul class="pagination justify-content-center mb-0">
+        <div class="card-footer bg-light">
+          <nav aria-label="Survey pages">
+            <ul class="pagination justify-content-center my-2">
+
+              <!-- Prev -->
+              <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link"
+                   href="/surveys?page=<%= currentPage - 1 %>&search=<%= search %>">
+                  ‹ Prev
+                </a>
+              </li>
+
+              <!-- Page numbers -->
               <% for (let i = 1; i <= totalPages; i++) { %>
                 <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                  <a class="page-link" href="/surveys?page=<%= i %>&search=<%= search %>"><%= i %></a>
+                  <a class="page-link" href="/surveys?page=<%= i %>&search=<%= search %>">
+                    <%= i %>
+                  </a>
                 </li>
               <% } %>
+
+              <!-- Next -->
+              <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                <a class="page-link"
+                   href="/surveys?page=<%= currentPage + 1 %>&search=<%= search %>">
+                  Next ›
+                </a>
+              </li>
+
             </ul>
           </nav>
         </div>
