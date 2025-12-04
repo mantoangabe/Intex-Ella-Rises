@@ -656,23 +656,39 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
 // --------------------------
 // VIEW ALL MILESTONES
 // --------------------------
+// ===========================
+// VIEW ALL MILESTONES (PAGINATED)
+// ===========================
 app.get("/milestones", requireLogin, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 25;                 // number of rows per page
+    const offset = (page - 1) * limit;
+
+    // Count total matching rows
+    const [{ count }] = await knex("milestones").count("* as count");
+
+    // Fetch paginated rows
     const milestones = await knex("milestones")
       .select("*")
-      .orderBy("milestone_id", "asc");
+      .orderBy("milestone_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
     res.render("milestones/milestones", {
       user: req.session.user,
       milestones,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
       nonce: res.locals.nonce
     });
 
   } catch (err) {
     console.error("Error fetching milestones:", err);
-    res.status(500).send("Error fetching milestones");
+    res.status(500).send("Error loading milestones");
   }
 });
+
 
 // --------------------------
 // SEARCH MILESTONES
@@ -684,19 +700,16 @@ app.post("/searchmilestones", requireLogin, async (req, res) => {
   try {
     const milestones = await knex("milestones")
       .where(function () {
-        // Always search title
         this.whereILike("title", `%${q}%`);
-
-        // Only search participant_id if q is a NON-empty NUMBER
-        if (q !== "" && !isNaN(q)) {
-          this.orWhere("participant_id", Number(q));
-        }
+        if (q !== "" && !isNaN(q)) this.orWhere("participant_id", Number(q));
       })
       .orderBy("milestone_id", "asc");
 
     res.render("milestones/milestones", {
       user: req.session.user,
       milestones,
+      currentPage: 1,       // required for the EJS
+      totalPages: 1,        // search results have no pagination unless we add it
       nonce: res.locals.nonce
     });
 
