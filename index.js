@@ -924,7 +924,7 @@ app.get("/events", requireLogin, async (req, res) => {
         "et.event_name as template_name",
         "et.event_type"
       )
-      .orderBy("eo.start_datetime", "asc")
+      .orderBy("eo.event_occurrence_id", "asc")
       .limit(limit)
       .offset(offset);
 
