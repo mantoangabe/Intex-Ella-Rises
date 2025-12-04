@@ -43,30 +43,58 @@ app.use((req, res, next) => {
   res.locals.nonce = crypto.randomBytes(16).toString("base64");
   next();
 });
+
 app.use(
   helmet({
     contentSecurityPolicy: {
       useDefaults: true,
       directives: {
         defaultSrc: ["'self'"],
+
         scriptSrc: [
           "'self'",
           (req, res) => `'nonce-${res.locals.nonce}'`,
-          "https://cdn.jsdelivr.net"    // allow Bootstrap JS
+          "https://cdn.jsdelivr.net",                      
+          "https://public.tableau.com",                    
+          "https://public.tableau.com/javascripts/api/",  
         ],
+
         styleSrc: [
           "'self'",
-          "'unsafe-inline'",            // Bootstrap needs this
-          "https://cdn.jsdelivr.net"
+          "'unsafe-inline'",                               
+          "https://cdn.jsdelivr.net",
+          "https://public.tableau.com",
         ],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'"],
+
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https:",
+          "https://public.tableau.com",
+        ],
+
+        connectSrc: [
+          "'self'",
+          "https://public.tableau.com",                    
+        ],
+
+        frameSrc: [
+          "'self'",
+          "https://public.tableau.com",                    
+        ],
+
+        childSrc: [
+          "'self'",
+          "https://public.tableau.com",                    
+        ],
+
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },
     },
   })
 );
+
 
 
 app.use(
