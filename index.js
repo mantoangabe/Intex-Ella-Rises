@@ -265,30 +265,40 @@ app.post("/deleteparticipant/:id", requireLogin, requireManager, async (req, res
   }
 });
 //Search route
-app.post('/searchparticipants', requireLogin, requireManager, async (req, res) => {
-  const UserSearch = req.body.UserSearch;
+app.post("/searchparticipants", requireLogin, requireManager, async (req, res) => {
+  const search = req.body.UserSearch.trim();
 
   try {
-    const result = await knex('participants')
-      .select('*')
-      .where({ email: UserSearch })
-      .first();
+    const results = await knex("participants")
+      .select("*")
+      .whereILike("email", `%${search}%`)   // partial match
+      .orWhereILike("first_name", `%${search}%`)
+      .orWhereILike("last_name", `%${search}%`)
+      .orderBy("participant_id", "asc");
 
-    if (result) {
-      res.render('participantinfo/participantresult.ejs', { user: result, found: true });
-    } else {
-      res.render('participantinfo/participantresult.ejs', { user: null, found: false, searchTerm: UserSearch });
-    }
+    res.render("participantinfo/participantresult.ejs", {
+      loggedInUser: req.session.user,   // navbar user
+      participants: results,            // results array
+      search,
+      found: results.length > 0
+    });
+
   } catch (err) {
-    console.error('Error searching users:', err);
-    res.status(500).send('Error searching for users');
+    console.error("Error searching users:", err);
+    res.status(500).send("Error searching for users");
   }
 });
 
+
 // Result page
-app.get('/participantresult', requireLogin, requireManager, (req, res) => {
-  res.render('participantinfo/participantresult.ejs', { user: req.session.user }, { user: null, found: false });
+app.get("/participantresult", requireLogin, requireManager, (req, res) => {
+  res.render("participantinfo/participantresult.ejs", {
+    loggedInUser: req.session.user,
+    participants: [],
+    found: false
+  });
 });
+
 
 //Edit page
 // Load edit form
