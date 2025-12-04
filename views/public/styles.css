@@ -402,3 +402,9 @@ body {
   color: var(--dark);
 }
 
+.login-btn {
+  padding: 10px 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
