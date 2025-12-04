@@ -443,10 +443,18 @@ app.post("/donations", requireLogin, async (req, res) => {
 
 app.get("/pastdonations", requireLogin, async (req, res) => {
   try {
-    let donations;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+    const offset = (page - 1) * limit;
 
+    let donations;
+    let countQuery;
+
+    // Admin/Manager sees ALL donations
     if (req.session.user.role === "admin" || req.session.user.role === "manager") {
-      // Admin sees ALL donations
+      countQuery = knex("donations")
+        .count("* as count");
+
       donations = await knex("donations")
         .join("participants", "donations.participant_id", "participants.participant_id")
         .select(
@@ -457,23 +465,36 @@ app.get("/pastdonations", requireLogin, async (req, res) => {
           "donations.amount",
           "donations.donation_date"
         )
-        .orderBy("donation_id", "asc");
+        .orderBy("donations.donation_id", "asc")
+        .limit(limit)
+        .offset(offset);
+    } 
+    
+    // Participants see ONLY their donations
+    else {
+      countQuery = knex("donations")
+        .where("participant_id", req.session.user.id)
+        .count("* as count");
 
-    } else {
-      // Normal participant sees ONLY their donations
       donations = await knex("donations")
-        .where("participant_id", req.session.user.participant_id)
-        .select("*")
-        .orderBy("donation_id", "asc");
+        .where("donations.participant_id", req.session.user.id)
+        .orderBy("donations.donation_id", "asc")
+        .limit(limit)
+        .offset(offset);
     }
+
+    // Get total count
+    const [{ count }] = await countQuery;
 
     res.render("donations/pastdonations", {
       user: req.session.user,
-      donations
+      donations,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit)
     });
 
   } catch (err) {
-    console.error("Error fetching donations:", err);
+    console.error("Error loading donations:", err);
     res.status(500).send("Error loading past donations");
   }
 });
@@ -491,11 +512,19 @@ app.post("/deletedonation/:id", requireLogin, requireManager, async (req, res) =
   }
 });
 
-app.post("/searchdonations", requireLogin, requireManager, async (req, res) => {
+app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
   try {
-    const term = req.body.DonationSearch.trim();
+    const term = (req.query.term || "").trim();
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+    const offset = (page - 1) * limit;
 
-    const donations = await knex("donations")
+    if (!term) {
+      return res.redirect("/pastdonations");
+    }
+
+    // Base query (shared by count + data)
+    let baseQuery = knex("donations")
       .join("participants", "donations.participant_id", "participants.participant_id")
       .select(
         "donations.donation_id",
@@ -505,16 +534,30 @@ app.post("/searchdonations", requireLogin, requireManager, async (req, res) => {
         "donations.amount",
         "donations.donation_date"
       )
-      .whereILike("participants.first_name", `%${term}%`)
-      .orWhereILike("participants.last_name", `%${term}%`)
-      .orWhereILike("amount", `%${term}%`)
-      .orWhereILike("donation_date", `%${term}%`)
-      .orderBy("donation_id", "asc");
+      .where(builder => {
+        builder
+          .whereILike("participants.first_name", `%${term}%`)
+          .orWhereILike("participants.last_name", `%${term}%`)
+          .orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${term}%`])
+          .orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${term}%`]);
+      });
+
+    // Count results
+    const [{ count }] = await baseQuery.clone().clear("select").count("* as count");
+
+    // Fetch paginated results
+    const donations = await baseQuery
+      .orderBy("donations.donation_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
     res.render("donations/pastdonations", {
       user: req.session.user,
       donations,
-      message: `Search results for: "${term}"`
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      searchTerm: term,
+      isSearch: true
     });
 
   } catch (err) {
@@ -522,6 +565,8 @@ app.post("/searchdonations", requireLogin, requireManager, async (req, res) => {
     res.status(500).send("Error searching donations");
   }
 });
+
+
 
 app.get("/editdonation/:id", requireLogin, requireManager, async (req, res) => {
   try {
