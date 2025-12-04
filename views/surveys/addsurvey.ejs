@@ -66,13 +66,20 @@
 
         <div class="card-body">
 
+          <!-- Optional admin-only participant selector -->
+          <% if (user.role === 'admin' && participantList && participantList.length > 0) { %>
+            <div class="alert alert-info py-2">
+              <i class="bi bi-person-check"></i> Admin mode: You can submit surveys on behalf of any participant.
+            </div>
+          <% } %>
+
           <form action="/surveys/add" method="POST">
 
             <!-- ==========================
                  SELECT PARTICIPANT & EVENT
             =========================== -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Select Participant & Event</label>
+              <label class="form-label fw-bold">Select Registration (Participant + Event)</label>
               <select id="registrationSelect" class="form-select" name="registration_id" required>
                 <option value="">-- Choose Registration --</option>
 
@@ -126,6 +133,7 @@
               <label class="form-label">Comments</label>
               <textarea class="form-control" name="comments" rows="3"></textarea>
             </div>
+
 
             <!-- SUBMIT BUTTON -->
             <div class="text-center mt-4">

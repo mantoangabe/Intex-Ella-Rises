@@ -508,11 +508,15 @@ app.get("/surveys", requireLogin, async (req, res) => {
 // --------------------------
 // ADD SURVEY FORM
 // --------------------------
+// ==============================
+// ADD SURVEY FORM (WINDOW VIEW)
+// ==============================
 app.get("/surveys/add", requireLogin, async (req, res) => {
   try {
     const loggedInId = req.session.user.id;
     const isAdmin = req.session.user.role === "admin";
 
+    // Base registration query
     let registrationsQuery = knex("registrations")
       .join("participants", "registrations.participant_id", "participants.participant_id")
       .join("event_occurrences", "registrations.event_occurrence_id", "event_occurrences.event_occurrence_id")
@@ -527,13 +531,17 @@ app.get("/surveys/add", requireLogin, async (req, res) => {
       )
       .orderBy("event_occurrences.start_datetime", "desc");
 
-    // If not admin → only show this user's registrations
+    // Non-admins → only their registrations
     if (!isAdmin) {
-      registrationsQuery = registrationsQuery.where("registrations.participant_id", loggedInId);
+      registrationsQuery = registrationsQuery.where(
+        "registrations.participant_id",
+        loggedInId
+      );
     }
 
     const registrations = await registrationsQuery;
 
+    // Admins can pick any participant
     let participantList = [];
     if (isAdmin) {
       participantList = await knex("participants")
@@ -558,6 +566,9 @@ app.get("/surveys/add", requireLogin, async (req, res) => {
 
 
 
+// ==============================
+// ADD SURVEY SUBMIT
+// ==============================
 app.post("/surveys/add", requireLogin, async (req, res) => {
   try {
     const isAdmin = req.session.user.role === "admin";
@@ -572,27 +583,21 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
       comments
     } = req.body;
 
-    // ------------------------------------
-    // 1. Get participant_id FROM REGISTRATION
-    // ------------------------------------
+    // Get the registration to derive participant_id
     const registration = await knex("registrations")
       .where({ registration_id })
       .first();
 
-    if (!registration) {
-      return res.status(400).send("Invalid registration.");
-    }
+    if (!registration) return res.status(400).send("Invalid registration selected.");
 
-    // Non-admins are only allowed to submit surveys for their own registrations
+    // Prevent a normal user from submitting for someone else
     if (!isAdmin && registration.participant_id !== loggedInId) {
-      return res.status(400).send("Invalid registration for this user.");
+      return res.status(400).send("You cannot submit a survey for another user.");
     }
 
     const participant_id = registration.participant_id;
 
-    // ------------------------------------
-    // 2. VALIDATE SCORES
-    // ------------------------------------
+    // Convert & validate scores
     const sat = Number(satisfaction_score);
     const use = Number(usefulness_score);
     const inst = Number(instructor_score);
@@ -603,9 +608,7 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
 
     const overall_score = (sat + use + inst) / 3;
 
-    // ------------------------------------
-    // 3. INSERT SURVEY
-    // ------------------------------------
+    // Insert survey
     await knex("surveys").insert({
       registration_id,
       participant_id,
@@ -625,6 +628,7 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
     res.status(500).send("Error adding survey");
   }
 });
+
 
 
 // MILESTONESS ROUTESS 
@@ -825,7 +829,9 @@ app.post("/deletemilestone/:id", requireLogin, requireManager, async (req, res) 
 
 
 
-
+// ==============================
+// EDIT SURVEY FORM (WINDOW VIEW)
+// ==============================
 app.get("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
   try {
     const survey = await knex("surveys")
@@ -845,6 +851,10 @@ app.get("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
   }
 });
 
+
+// ==============================
+// EDIT SURVEY SUBMIT
+// ==============================
 app.post("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
   try {
     const {
@@ -855,18 +865,22 @@ app.post("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => 
       comments
     } = req.body;
 
-    // Convert to numbers & compute average
-    const overall_score =
-      (Number(satisfaction_score) +
-       Number(usefulness_score) +
-       Number(instructor_score)) / 3;
+    const sat = Number(satisfaction_score);
+    const use = Number(usefulness_score);
+    const inst = Number(instructor_score);
+
+    if (![sat, use, inst].every(n => Number.isFinite(n) && n >= 1 && n <= 5)) {
+      return res.status(400).send("Scores must be between 1 and 5.");
+    }
+
+    const overall_score = (sat + use + inst) / 3;
 
     await knex("surveys")
       .where("survey_id", req.params.id)
       .update({
-        satisfaction_score,
-        usefulness_score,
-        instructor_score,
+        satisfaction_score: sat,
+        usefulness_score: use,
+        instructor_score: inst,
         overall_score,
         nps_bucket,
         comments
@@ -879,6 +893,7 @@ app.post("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => 
     res.status(500).send("Error updating survey");
   }
 });
+
 
 
 app.post("/surveys/delete/:id", requireLogin, requireManager, async (req, res) => {
