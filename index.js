@@ -478,7 +478,7 @@ app.get("/pastdonations", requireLogin, async (req, res) => {
   }
 });
 
-app.post("/deletedonation/:id", requireLogin, requireAdmin, async (req, res) => {
+app.post("/deletedonation/:id", requireLogin, requireManager, async (req, res) => {
   try {
     await knex("donations")
       .where("donation_id", req.params.id)
@@ -491,7 +491,7 @@ app.post("/deletedonation/:id", requireLogin, requireAdmin, async (req, res) => 
   }
 });
 
-app.post("/searchdonations", requireLogin, requireAdmin, async (req, res) => {
+app.post("/searchdonations", requireLogin, requireManager, async (req, res) => {
   try {
     const term = req.body.DonationSearch.trim();
 
@@ -523,7 +523,7 @@ app.post("/searchdonations", requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
-app.get("/editdonation/:id", requireLogin, requireAdmin, async (req, res) => {
+app.get("/editdonation/:id", requireLogin, requireManager, async (req, res) => {
   try {
     const donation = await knex("donations")
       .where("donation_id", req.params.id)
@@ -542,7 +542,7 @@ app.get("/editdonation/:id", requireLogin, requireAdmin, async (req, res) => {
   }
 });
 
-app.post("/editdonation/:id", requireLogin, requireAdmin, async (req, res) => {
+app.post("/editdonation/:id", requireLogin, requireManager, async (req, res) => {
   try {
     const { amount, donation_date } = req.body;
 
