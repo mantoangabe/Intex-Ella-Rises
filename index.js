@@ -443,56 +443,65 @@ app.post("/donations", requireLogin, async (req, res) => {
 
 app.get("/pastdonations", requireLogin, async (req, res) => {
   try {
+    const search = (req.query.search || "").trim();
     const page = parseInt(req.query.page) || 1;
     const limit = 50;
     const offset = (page - 1) * limit;
 
-    let donations;
-    let countQuery;
+    const isAdmin = req.session.user.role === "admin" || req.session.user.role === "manager";
+    const userId = req.session.user.id;
 
-    // Admin/Manager sees ALL donations
-    if (req.session.user.role === "admin" || req.session.user.role === "manager") {
-      countQuery = knex("donations").count("* as count");
+    //
+    // BASE QUERY
+    //
+    let query = knex("donations")
+      .join("participants", "donations.participant_id", "participants.participant_id")
+      .select(
+        "donations.donation_id",
+        "donations.participant_id",
+        "participants.first_name",
+        "participants.last_name",
+        "donations.amount",
+        "donations.donation_date"
+      );
 
-      donations = await knex("donations")
-        .join("participants", "donations.participant_id", "participants.participant_id")
-        .select(
-          "donations.donation_id",
-          "donations.participant_id",
-          "participants.first_name",
-          "participants.last_name",
-          "donations.amount",
-          "donations.donation_date"
-        )
-        .orderBy("donations.donation_id", "asc")
-        .limit(limit)
-        .offset(offset);
-    } 
-    
-    // Participants see ONLY their donations
-    else {
-      countQuery = knex("donations")
-        .where("participant_id", req.session.user.id)
-        .count("* as count");
-
-      donations = await knex("donations")
-        .where("participant_id", req.session.user.id)
-        .orderBy("donations.donation_id", "asc")
-        .limit(limit)
-        .offset(offset);
+    // Normal participants see ONLY their donations
+    if (!isAdmin) {
+      query.where("donations.participant_id", userId);
     }
 
-    const [{ count }] = await countQuery;
+    //
+    // SEARCH
+    //
+    if (search !== "") {
+      query.andWhere(qb => {
+        qb.whereILike("participants.first_name", `%${search}%`)
+          .orWhereILike("participants.last_name", `%${search}%`)
+          .orWhereRaw("participants.first_name || ' ' || participants.last_name ILIKE ?", [`%${search}%`])
+          .orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${search}%`])
+          .orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${search}%`]);
+      });
+    }
+
+    //
+    // COUNT RESULTS BEFORE PAGINATION
+    //
+    const [{ count }] = await query.clone().clear("select").count("* as count");
+
+    //
+    // GET PAGINATED RESULTS
+    //
+    const donations = await query
+      .orderBy("donations.donation_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
     res.render("donations/pastdonations", {
       user: req.session.user,
       donations,
+      search,
       currentPage: page,
-      totalPages: Math.ceil(count / limit),
-
-    
-      searchTerm: "",
-      isSearch: false
+      totalPages: Math.ceil(count / limit)
     });
 
   } catch (err) {
@@ -500,6 +509,7 @@ app.get("/pastdonations", requireLogin, async (req, res) => {
     res.status(500).send("Error loading past donations");
   }
 });
+
 
 app.post("/deletedonation/:id", requireLogin, requireManager, async (req, res) => {
   try {
@@ -511,84 +521,6 @@ app.post("/deletedonation/:id", requireLogin, requireManager, async (req, res) =
   } catch (err) {
     console.error("Error deleting donation:", err);
     res.status(500).send("Error deleting donation");
-  }
-});
-
-app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
-  try {
-    const term = (req.query.term || "").trim();
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = 50;
-    const offset = (page - 1) * limit;
-
-    if (!term) {
-      return res.redirect("/pastdonations");
-    }
-
-    // Split term (for "Ella Johnson" → ["Ella", "Johnson"])
-    const parts = term.split(/\s+/).filter(Boolean);
-
-    let baseQuery = knex("donations")
-      .join("participants", "donations.participant_id", "participants.participant_id")
-      .select(
-        "donations.donation_id",
-        "donations.participant_id",
-        "participants.first_name",
-        "participants.last_name",
-        "donations.amount",
-        "donations.donation_date"
-      )
-      .where(qb => {
-        //
-        // GROUP 1 – NAME SEARCHING
-        //
-        qb.where(inner => {
-          // full name "Ella Johnson"
-          inner.whereRaw(
-            "TRIM(participants.first_name) || ' ' || TRIM(participants.last_name) ILIKE ?",
-            [`%${term}%`]
-          );
-
-          // exact term matches either name
-          inner.orWhereILike("participants.first_name", `%${term}%`);
-          inner.orWhereILike("participants.last_name", `%${term}%`);
-
-          // each word matches a name part
-          parts.forEach(p => {
-            inner.orWhereILike("participants.first_name", `%${p}%`);
-            inner.orWhereILike("participants.last_name", `%${p}%`);
-          });
-        });
-
-        //
-        // GROUP 2 – AMOUNT + DATE SEARCHING
-        //
-        qb.orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${term}%`]);
-        qb.orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${term}%`]);
-      });
-
-    // Count results
-    const [{ count }] = await baseQuery.clone().clear("select").count("* as count");
-
-    // Fetch paginated results
-    const donations = await baseQuery
-      .orderBy("donations.donation_id", "asc")
-      .limit(limit)
-      .offset(offset);
-
-    res.render("donations/pastdonations", {
-      user: req.session.user,
-      donations,
-      currentPage: page,
-      totalPages: Math.ceil(count / limit),
-      searchTerm: term,
-      isSearch: true
-    });
-
-  } catch (err) {
-    console.error("Donation search error:", err);
-    res.status(500).send("Error searching donations");
   }
 });
 

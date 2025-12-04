@@ -53,20 +53,21 @@
     <div class="card-header custom-nav-color text-white">
       <h5 class="mb-0"><i class="bi bi-cash-stack"></i> Past Donations</h5>
     </div>
+  </div>
 
 <!-- Search Donations -->
-<div class="row mb-4">
+<div class="row mb-4 mt-3">
   <div class="col-12">
     <div class="card shadow-sm">
       <div class="card-body">
-        <form action="/searchdonations" method="GET">
+        <form action="/pastdonations" method="GET">
           <div class="input-group">
             <input 
               type="text" 
-              name="term"
+              name="search"
               class="form-control form-control-lg"
               placeholder="Search by participant, amount, or date..."
-              value="<%= searchTerm || '' %>"
+              value="<%= search || '' %>"
             >
             <button class="btn btn-dark btn-lg" type="submit">
               <i class="bi bi-search"></i> Search
@@ -118,8 +119,7 @@
               <form 
                 action="/deletedonation/<%= d.donation_id %>"
                 method="POST"
-                class="delete-form"
-                style="display:inline;"
+                class="delete-form d-inline"
               >
                 <button class="btn btn-danger btn-sm">
                   <i class="bi bi-trash"></i> Delete
@@ -138,36 +138,22 @@
     <nav>
       <ul class="pagination">
 
-        <% 
-          const baseUrl = isSearch 
-            ? `/searchdonations?term=${encodeURIComponent(searchTerm)}&page=` 
-            : `/pastdonations?page=`; 
-        %>
-
         <!-- Prev button -->
-        <% if (currentPage > 1) { %>
-          <li class="page-item">
-            <a class="page-link" href="<%= baseUrl + (currentPage - 1) %>">Previous</a>
-          </li>
-        <% } else { %>
-          <li class="page-item disabled"><span class="page-link">Previous</span></li>
-        <% } %>
+        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+          <a class="page-link" href="/pastdonations?page=<%= currentPage - 1 %>&search=<%= search %>">Previous</a>
+        </li>
 
         <!-- Page numbers -->
         <% for (let p = 1; p <= totalPages; p++) { %>
           <li class="page-item <%= p === currentPage ? 'active' : '' %>">
-            <a class="page-link" href="<%= baseUrl + p %>"><%= p %></a>
+            <a class="page-link" href="/pastdonations?page=<%= p %>&search=<%= search %>"><%= p %></a>
           </li>
         <% } %>
 
         <!-- Next button -->
-        <% if (currentPage < totalPages) { %>
-          <li class="page-item">
-            <a class="page-link" href="<%= baseUrl + (currentPage + 1) %>">Next</a>
-          </li>
-        <% } else { %>
-          <li class="page-item disabled"><span class="page-link">Next</span></li>
-        <% } %>
+        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+          <a class="page-link" href="/pastdonations?page=<%= currentPage + 1 %>&search=<%= search %>">Next</a>
+        </li>
 
       </ul>
     </nav>
