@@ -593,7 +593,7 @@ app.get("/surveys/add", requireLogin, async (req, res) => {
         .orderBy("last_name", "asc");
     }
 
-    res.render("surveys/addSurvey.ejs", {
+    res.render("surveys/addsurvey.ejs", {
       user: req.session.user,
       registrations,
       participantList,
