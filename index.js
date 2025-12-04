@@ -581,7 +581,199 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
 });
 
 
+// MILESTONESS ROUTESS 
 
+// =======================================================
+// MILESTONES ROUTES (FULL CRUD)
+// =======================================================
+
+
+
+// --------------------------
+// VIEW ALL MILESTONES
+// --------------------------
+app.get("/milestones", requireLogin, async (req, res) => {
+  try {
+    const milestones = await knex("milestones")
+      .select("*")
+      .orderBy("milestone_id", "asc");
+
+    res.render("milestones/milestones", {
+      user: req.session.user,
+      milestones,
+      nonce: res.locals.nonce
+    });
+
+  } catch (err) {
+    console.error("Error fetching milestones:", err);
+    res.status(500).send("Error fetching milestones");
+  }
+});
+
+// --------------------------
+// SEARCH MILESTONES
+// --------------------------
+app.post("/searchmilestones", requireLogin, async (req, res) => {
+  const rawSearch = req.body.MilestoneSearch || "";
+  const q = rawSearch.trim();
+
+  try {
+    const milestones = await knex("milestones")
+      .where(function () {
+        // Always search title
+        this.whereILike("title", `%${q}%`);
+
+        // Only search participant_id if q is a NON-empty NUMBER
+        if (q !== "" && !isNaN(q)) {
+          this.orWhere("participant_id", Number(q));
+        }
+      })
+      .orderBy("milestone_id", "asc");
+
+    res.render("milestones/milestones", {
+      user: req.session.user,
+      milestones,
+      nonce: res.locals.nonce
+    });
+
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).send("Error searching milestones");
+  }
+});
+
+
+
+// --------------------------
+// ADD MILESTONE (FORM)
+// --------------------------
+app.get("/addmilestone", requireLogin, requireManager, async (req, res) => {
+  try {
+    const titles = await knex("milestones")
+      .distinct("title")
+      .orderBy("title", "asc");
+
+    const participants = await knex("participants")
+      .select("participant_id", "first_name", "last_name")
+      .orderBy("first_name", "asc");
+
+    res.render("milestones/addmilestone", {
+      user: req.session.user,
+      titles,
+      participants,
+      nonce: res.locals.nonce
+    }); 
+
+  } catch (err) {
+    console.error("Error loading milestone data:", err);
+    res.status(500).send("Error loading milestone data");
+  }
+});
+
+
+// --------------------------
+// ADD MILESTONE (SUBMIT)
+// --------------------------
+app.post("/addmilestone", requireLogin, requireManager, async (req, res) => {
+  const { participant_id, title, achieved_date } = req.body;
+
+  try {
+    await knex("milestones").insert({
+      participant_id,
+      title,
+      achieved_date
+    });
+
+    res.redirect("/milestones");
+
+  } catch (err) {
+    console.error("Error adding milestone:", err);
+    res.status(500).send("Error adding milestone");
+  }
+});
+
+// --------------------------
+// EDIT MILESTONE (FORM)
+// --------------------------
+app.get("/editmilestone/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const milestone = await knex("milestones")
+      .where({ milestone_id: id })
+      .first();
+
+    if (!milestone) {
+      return res.status(404).send("Milestone not found");
+    }
+
+    // Load participants for dropdown
+    const participants = await knex("participants")
+      .select("participant_id", "first_name", "last_name")
+      .orderBy("first_name", "asc");
+
+    // Load milestone titles for dropdown OR custom entry
+    const titles = await knex("milestones")
+      .distinct("title")
+      .orderBy("title", "asc");
+
+    res.render("milestones/editmilestone", {
+      user: req.session.user,
+      milestone,
+      participants,
+      titles,
+      nonce: res.locals.nonce
+    });
+
+  } catch (err) {
+    console.error("Error loading milestone:", err);
+    res.status(500).send("Error loading milestone");
+  }
+});
+
+
+// --------------------------
+// EDIT MILESTONE (SUBMIT)
+// --------------------------
+app.post("/editmilestone/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+  const { participant_id, title, achieved_date } = req.body;
+
+  try {
+    await knex("milestones")
+      .where({ milestone_id: id })
+      .update({
+        participant_id,
+        title,
+        achieved_date
+      });
+
+    res.redirect("/milestones");
+
+  } catch (err) {
+    console.error("Error editing milestone:", err);
+    res.status(500).send("Error editing milestone");
+  }
+});
+
+// --------------------------
+// DELETE MILESTONE
+// --------------------------
+app.post("/deletemilestone/:id", requireLogin, requireManager, async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    await knex("milestones")
+      .where({ milestone_id: id })
+      .del();
+
+    res.redirect("/milestones");
+
+  } catch (err) {
+    console.error("Error deleting milestone:", err);
+    res.status(500).send("Error deleting milestone");
+  }
+});
 
 
 
@@ -678,6 +870,24 @@ async function syncEventSequence() {
     console.log(`✅ event_occurrences_event_occurrence_id_seq synced to start at ${nextVal}`);
   } catch (err) {
     console.error("⚠️ Failed to sync event sequence:", err);
+  }
+}
+async function syncMilestoneSequence() {
+  try {
+    // Get the current max milestone_id
+    const result = await knex("milestones").max("milestone_id as max_id");
+    const maxId = result[0].max_id || 0;
+    const nextVal = maxId + 1;
+
+    // Sync the sequence
+    await knex.raw(
+      "SELECT setval('public.milestones_milestone_id_seq', ?, false);",
+      [nextVal]
+    );
+
+    console.log(`✅ milestones_milestone_id_seq synced to start at ${nextVal}`);
+  } catch (err) {
+    console.error("⚠️ Failed to sync milestone sequence:", err);
   }
 }
 
@@ -889,7 +1099,7 @@ async function startServer() {
   try {
     await syncDonationSequence();
     await syncEventSequence();  // <-- ADD THIS LINE
-
+    await syncMilestoneSequence();
     app.listen(3000, () => {
       console.log("Server running on port 3000");
     });
