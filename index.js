@@ -517,6 +517,7 @@ app.post("/deletedonation/:id", requireLogin, requireManager, async (req, res) =
 app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
   try {
     const term = (req.query.term || "").trim();
+
     const page = parseInt(req.query.page) || 1;
     const limit = 50;
     const offset = (page - 1) * limit;
@@ -525,7 +526,9 @@ app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
       return res.redirect("/pastdonations");
     }
 
-    // Base query (shared by count + data)
+    // Split term (for "Ella Johnson" → ["Ella", "Johnson"])
+    const parts = term.split(/\s+/).filter(Boolean);
+
     let baseQuery = knex("donations")
       .join("participants", "donations.participant_id", "participants.participant_id")
       .select(
@@ -536,25 +539,33 @@ app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
         "donations.amount",
         "donations.donation_date"
       )
-      .where(builder => {
-        builder
-          // First name matches
-          .whereILike("participants.first_name", `%${term}%`)
-
-          // OR last name matches
-          .orWhereILike("participants.last_name", `%${term}%`)
-
-          
-          .orWhereRaw(
-            "participants.first_name || ' ' || participants.last_name ILIKE ?",
+      .where(qb => {
+        //
+        // GROUP 1 – NAME SEARCHING
+        //
+        qb.where(inner => {
+          // full name "Ella Johnson"
+          inner.whereRaw(
+            "TRIM(participants.first_name) || ' ' || TRIM(participants.last_name) ILIKE ?",
             [`%${term}%`]
-          )
+          );
 
-          // Amount matches
-          .orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${term}%`])
+          // exact term matches either name
+          inner.orWhereILike("participants.first_name", `%${term}%`);
+          inner.orWhereILike("participants.last_name", `%${term}%`);
 
-          // Date matches
-          .orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${term}%`]);
+          // each word matches a name part
+          parts.forEach(p => {
+            inner.orWhereILike("participants.first_name", `%${p}%`);
+            inner.orWhereILike("participants.last_name", `%${p}%`);
+          });
+        });
+
+        //
+        // GROUP 2 – AMOUNT + DATE SEARCHING
+        //
+        qb.orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${term}%`]);
+        qb.orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${term}%`]);
       });
 
     // Count results
@@ -580,6 +591,7 @@ app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
     res.status(500).send("Error searching donations");
   }
 });
+
 
 
 
