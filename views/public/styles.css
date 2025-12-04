@@ -80,13 +80,10 @@ body {
   padding-bottom: 40px;
 }
 
-/* Force text color inside the auto hero section */
-section.er-hero.er-hero-auto h2.hero-big-title,
-section.er-hero.er-hero-auto p.hero-big-subtext {
-  color: #3A3F3B !important;
-}
-section.er-hero.er-hero-auto * {
-  color: #3A3F3B !important;
+.er-hero {
+  background: var(--blue-light);
+  padding: 4rem 1rem;
+  color: var(--dark);   /* ← THIS IS WHAT YOU ARE MISSING */
 }
 
 
