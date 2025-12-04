@@ -269,18 +269,18 @@ app.post("/searchparticipants", requireLogin, requireManager, async (req, res) =
   const search = req.body.UserSearch.trim();
 
   try {
-    const results = await knex("participants")
+    const participants = await knex("participants")
       .select("*")
-      .whereILike("email", `%${search}%`)   // partial match
+      .whereILike("email", `%${search}%`)
       .orWhereILike("first_name", `%${search}%`)
       .orWhereILike("last_name", `%${search}%`)
       .orderBy("participant_id", "asc");
 
     res.render("participantinfo/participantresult.ejs", {
-      loggedInUser: req.session.user,   // navbar user
-      participants: results,            // results array
-      search,
-      found: results.length > 0
+      user: req.session.user,          // logged-in user for navbar
+      participants,                    // result array
+      search,                          // search text
+      found: participants.length > 0   // bool
     });
 
   } catch (err) {
@@ -290,14 +290,17 @@ app.post("/searchparticipants", requireLogin, requireManager, async (req, res) =
 });
 
 
+
 // Result page
 app.get("/participantresult", requireLogin, requireManager, (req, res) => {
   res.render("participantinfo/participantresult.ejs", {
-    loggedInUser: req.session.user,
-    participants: [],
+    user: req.session.user,  // navbar user
+    participants: [],        // no results
+    search: "",
     found: false
   });
 });
+
 
 
 //Edit page
