@@ -109,6 +109,7 @@
         <tr>
           <th>ID</th>
           <th>Participant ID</th>
+          <th>Participant Name</th>
           <th>Title</th>
           <th>Achieved Date</th>
 
@@ -123,6 +124,7 @@
         <tr>
           <td><%= m.milestone_id %></td>
           <td><%= m.participant_id %></td>
+          <td><%= m.participant_name %></td>
           <td><%= m.title %></td>
           <td><%= m.achieved_date ? m.achieved_date.toISOString().slice(0,10) : "" %></td>
 

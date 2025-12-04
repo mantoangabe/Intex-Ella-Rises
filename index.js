@@ -690,16 +690,23 @@ app.post("/surveys/add", requireLogin, async (req, res) => {
 app.get("/milestones", requireLogin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 25;                 // number of rows per page
+    const limit = 25;
     const offset = (page - 1) * limit;
 
-    // Count total matching rows
+    // Count total milestones
     const [{ count }] = await knex("milestones").count("* as count");
 
-    // Fetch paginated rows
-    const milestones = await knex("milestones")
-      .select("*")
-      .orderBy("milestone_id", "asc")
+    // Fetch milestones WITH participant names
+    const milestones = await knex("milestones as m")
+      .leftJoin("participants as p", "m.participant_id", "p.participant_id")
+      .select(
+        "m.milestone_id",
+        "m.participant_id",
+        "m.title",
+        "m.achieved_date",
+        knex.raw("p.first_name || ' ' || p.last_name AS participant_name")
+      )
+      .orderBy("m.milestone_id", "asc")
       .limit(limit)
       .offset(offset);
 
@@ -718,6 +725,7 @@ app.get("/milestones", requireLogin, async (req, res) => {
 });
 
 
+
 // --------------------------
 // SEARCH MILESTONES
 // --------------------------
@@ -727,20 +735,32 @@ app.get("/milestones", requireLogin, async (req, res) => {
 app.post("/searchmilestones", requireLogin, async (req, res) => {
   const q = (req.body.MilestoneSearch || "").trim();
 
-  // If search box is empty → redirect safely
   if (!q) {
     return res.redirect("/milestones");
   }
 
   try {
-    const milestones = await knex("milestones")
-      .where(function () {
-        this.whereILike("title", `%${q}%`);
+    const milestones = await knex("milestones as m")
+      .leftJoin("participants as p", "m.participant_id", "p.participant_id")
+      .select(
+        "m.milestone_id",
+        "m.participant_id",
+        "m.title",
+        "m.achieved_date",
+        knex.raw("p.first_name || ' ' || p.last_name AS participant_name")
+      )
+      .where(builder => {
+        builder.whereILike("m.title", `%${q}%`);
+
         if (!isNaN(q)) {
-          this.orWhere("participant_id", Number(q));
+          builder.orWhere("m.participant_id", Number(q));
         }
+
+        builder.orWhereILike("p.first_name", `%${q}%`);
+        builder.orWhereILike("p.last_name", `%${q}%`);
+        builder.orWhereRaw("p.first_name || ' ' || p.last_name ILIKE ?", [`%${q}%`]);
       })
-      .orderBy("milestone_id", "asc");
+      .orderBy("m.milestone_id", "asc");
 
     res.render("milestones/milestones", {
       user: req.session.user,
