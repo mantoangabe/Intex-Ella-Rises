@@ -538,9 +538,22 @@ app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
       )
       .where(builder => {
         builder
+          // First name matches
           .whereILike("participants.first_name", `%${term}%`)
+
+          // OR last name matches
           .orWhereILike("participants.last_name", `%${term}%`)
+
+          
+          .orWhereRaw(
+            "participants.first_name || ' ' || participants.last_name ILIKE ?",
+            [`%${term}%`]
+          )
+
+          // Amount matches
           .orWhereRaw("CAST(donations.amount AS TEXT) ILIKE ?", [`%${term}%`])
+
+          // Date matches
           .orWhereRaw("CAST(donations.donation_date AS TEXT) ILIKE ?", [`%${term}%`]);
       });
 
@@ -567,6 +580,7 @@ app.get("/searchdonations", requireLogin, requireManager, async (req, res) => {
     res.status(500).send("Error searching donations");
   }
 });
+
 
 
 
