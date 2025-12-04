@@ -115,9 +115,10 @@ app.use(
 // VIEW ENGINE
 // --------------------------
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));      // REQUIRED
 app.use(express.static(path.join(__dirname, "views", "public")));
-
 app.use("/images", express.static(path.join(__dirname, "images")));
+
 
 // --------------------------
 // AUTH HELPERS
