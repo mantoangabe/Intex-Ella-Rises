@@ -6,7 +6,7 @@ const session = require("express-session");
 const helmet = require("helmet");
 const knexLib = require("knex");
 const KnexSessionStore = require("connect-session-knex")(session);
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const path = require("path");
 const crypto = require("crypto");
 
@@ -25,9 +25,13 @@ const knex = require("knex")({
     password: process.env.RDS_PASSWORD,
     database: process.env.RDS_DB_NAME,
     port: process.env.RDS_PORT,
-    ssl: { rejectUnauthorized: false }   // 🔥 REQUIRED FOR RDS
+    ssl: { rejectUnauthorized: false }
   },
 });
+
+// Force schema so postgres finds your tables
+knex.raw('SET search_path TO public');
+
 
 
 // --------------------------

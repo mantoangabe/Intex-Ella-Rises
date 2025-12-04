@@ -9,7 +9,7 @@
     "array-flatten": "^1.1.1",
     "async": "^3.2.6",
     "balanced-match": "^1.0.2",
-    "bcryptjs": "^3.0.3",
+    "bcrypt": "^6.0.0",
     "body-parser": "^1.20.3",
     "brace-expansion": "^2.0.2",
     "buffer-from": "^1.1.2",
@@ -150,6 +150,5 @@
     "url": "https://github.com/Da111an/INTEX-3-10/issues"
   },
   "homepage": "https://github.com/Da111an/INTEX-3-10#readme",
-  "devDependencies": {},
   "type": "commonjs"
 }
