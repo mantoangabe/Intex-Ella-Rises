@@ -12,45 +12,45 @@
 <body class="bg-light custom-bg">
 
     <nav class="navbar navbar-expand-lg er-nav">
-  <div class="container d-flex justify-content-between align-items-center">
+        <div class="container d-flex justify-content-between align-items-center">
 
-    <!-- Logo -->
-    <a class="navbar-brand d-flex align-items-center" href="/">
-      <img src="/images/ella.jpeg" class="er-logo-small me-2">
-      <span class="fw-bold">Ella Rises</span>
-    </a>
+            <!-- Logo -->
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/images/ella.jpeg" class="er-logo-small me-2">
+                <span class="fw-bold">Ella Rises</span>
+            </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav ms-auto align-items-center gap-2">
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center gap-2">
 
-        <% if (!user) { %>
-          <li class="nav-item">
-            <a class="nav-link er-donate-btn" href="/login">Login</a>
-          </li>
-        <% } else { %>
-          <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
-          <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
-          <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
-          <li class="nav-item"><a class="nav-link nav-btn" href="/events">Events</a></li>
+                    <% if (!user) { %>
+                        <li class="nav-item">
+                            <a class="nav-link er-donate-btn" href="/login">Login</a>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
+                        <li class="nav-item"><a class="nav-link nav-btn" href="/milestones">Milestones</a></li>
+                        <li class="nav-item"><a class="nav-link nav-btn" href="/donations">Donations</a></li>
+                        <li class="nav-item"><a class="nav-link nav-btn" href="/events">Events</a></li>
 
-          <% if (user.role === "admin") { %>
-            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
-            <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
-          <% } %>
+                        <% if (user.role === "admin") { %>
+                            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
+                            <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
+                        <% } %>
 
-          <li class="nav-item">
-            <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
-          </li>
-        <% } %>
-      </ul>
-    </div>
+                        <li class="nav-item">
+                            <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
+                        </li>
+                    <% } %>
+                </ul>
+            </div>
 
-  </div>
-</nav>
+        </div>
+    </nav>
 
     <div class="container py-4">
 
@@ -58,7 +58,7 @@
             <div class="col-lg-7 col-md-9">
 
                 <div class="card shadow border-0">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header bg-primary custom-nav-color">
                         <h4 class="mb-0 text-center"><i class="bi bi-pencil"></i> Edit User Information</h4>
                     </div>
 
@@ -155,7 +155,11 @@
                             <!-- Field of Interest -->
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Field of Interest</label>
-                                <input type="text" name="field_of_interest" class="form-control" value="<%= participant.field_of_interest %>" required>
+                                <select name="field_of_interest" class="form-select" required>
+                                    <option value="STEM" <%= participant.field_of_interest === 'STEM' ? 'selected' : '' %>>STEM</option>
+                                    <option value="Arts" <%= participant.field_of_interest === 'Arts' ? 'selected' : '' %>>Arts</option>
+                                    <option value="Both" <%= participant.field_of_interest === 'Both' ? 'selected' : '' %>>Both</option>
+                                </select>
                             </div>
 
                             <!-- Buttons -->
