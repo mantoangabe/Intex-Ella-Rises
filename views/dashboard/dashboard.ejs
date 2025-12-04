@@ -19,24 +19,24 @@
   ></script>
 
   <style>
-    /* Full-width responsive container */
-    .tableau-container {
-      width: 100%;
-      overflow: hidden;
+    /* FULL WIDTH, NO BOOTSTRAP LIMITS */
+    .tableau-fullwrap {
+      width: 100vw;      /* full viewport width */
+      margin-left: calc(50% - 50vw); /* break out of Bootstrap container */
+      margin-right: calc(50% - 50vw);
+      overflow-x: hidden;
     }
 
-    /* Tableau visualization */
     tableau-viz {
       width: 100%;
-      height: 1800px;    /* <<< BIG HEIGHT — adjust as needed */
+      height: 1200px;
       border: none;
       display: block;
     }
 
-    /* Mobile adjustments */
     @media (max-width: 768px) {
       tableau-viz {
-        height: 2300px; /* phones need more height */
+        height: 1800px;
       }
     }
   </style>
@@ -54,7 +54,6 @@
         <span class="fw-bold">Ella Rises</span>
       </a>
 
-      <!-- Mobile Toggle -->
       <button
         class="navbar-toggler"
         type="button"
@@ -64,13 +63,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Navigation -->
       <div class="collapse navbar-collapse" id="navMenu">
         <ul class="navbar-nav ms-auto align-items-center gap-2">
           <% if (!user) { %>
-            <li class="nav-item">
-              <a class="nav-link er-donate-btn" href="/login">Login</a>
-            </li>
+            <li class="nav-item"><a class="nav-link er-donate-btn" href="/login">Login</a></li>
           <% } else { %>
 
             <li class="nav-item"><a class="nav-link nav-btn" href="/surveys">Surveys</a></li>
@@ -83,35 +79,26 @@
               <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
             <% } %>
 
-            <li class="nav-item">
-              <a class="nav-link nav-btn logout-btn" href="/logout">Logout</a>
-            </li>
+            <li class="nav-item"><a class="nav-link nav-btn logout-btn" href="/logout">Logout</a></li>
 
           <% } %>
         </ul>
       </div>
+
     </div>
   </nav>
 </header>
 
-<!-- MAIN CONTENT -->
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-12 text-center">
+<!-- FULL WIDTH DASHBOARD -->
+<div class="tableau-fullwrap">
+  <h2 class="text-center mb-4 mt-4">Ella Rises Dashboard</h2>
 
-      <h2 class="mb-4">Ella Rises Dashboard</h2>
-
-      <div class="tableau-container">
-        <tableau-viz
-          id="ellaDashboard"
-          src="https://public.tableau.com/views/Tab3-10/Dashboard2"
-          toolbar="bottom"
-          hide-tabs
-        ></tableau-viz>
-      </div>
-
-    </div>
-  </div>
+  <tableau-viz
+    id="ellaDashboard"
+    src="https://public.tableau.com/views/Tab3-10/Dashboard2"
+    toolbar="bottom"
+    hide-tabs
+  ></tableau-viz>
 </div>
 
 <!-- Bootstrap JS -->
