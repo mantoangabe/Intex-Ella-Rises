@@ -409,3 +409,17 @@ body {
   font-weight: 700;
 }
 
+.back-link {
+  display: inline-block;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: var(--dark);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+  color: var(--dark);
+}
+
