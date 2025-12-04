@@ -444,16 +444,19 @@ async function syncDonationSequence() {
 }
 // Survey Routes
 
-// --------------------------
 // SURVEYS (POST-EVENT)
-// --------------------------
+// With Pagination
+// ==========================
 app.get("/surveys", requireLogin, async (req, res) => {
   try {
     const search = req.query.search || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = 25;              // surveys per page
+    const offset = (page - 1) * limit;
     const loggedInId = req.session.user.id;
     const isAdmin = req.session.user.role === "admin";
 
-    // Base query
+    // Base query (for results)
     let query = knex("surveys")
       .join("registrations", "surveys.registration_id", "registrations.registration_id")
       .join("participants", "surveys.participant_id", "participants.participant_id")
@@ -467,12 +470,12 @@ app.get("/surveys", requireLogin, async (req, res) => {
         "event_occurrences.start_datetime"
       );
 
-    // ⭐ NORMAL USER → ONLY THEIR SURVEYS
+    // Normal users → only their surveys
     if (!isAdmin) {
       query = query.where("surveys.participant_id", loggedInId);
     }
 
-    // ⭐ SEARCH FILTER
+    // Search
     if (search.trim() !== "") {
       query = query.andWhere(builder =>
         builder
@@ -486,12 +489,22 @@ app.get("/surveys", requireLogin, async (req, res) => {
       );
     }
 
-    const surveys = await query.orderBy("surveys.survey_id", "asc");
+    // Count query (same filters)
+    let countQuery = query.clone().clear("select").count("* as count");
+    const [{ count }] = await countQuery;
+
+    // Fetch paginated results
+    const surveys = await query
+      .orderBy("surveys.survey_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
     res.render("surveys/surveys.ejs", {
       user: req.session.user,
       surveys,
-      search
+      search,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit)
     });
 
   } catch (err) {
@@ -499,6 +512,7 @@ app.get("/surveys", requireLogin, async (req, res) => {
     res.status(500).send("Error loading surveys");
   }
 });
+
 
 
 
