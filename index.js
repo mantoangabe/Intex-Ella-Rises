@@ -18,12 +18,12 @@ const app = express();
 const knex = require("knex")({
   client: "pg",
   connection: {
-    host: process.env.DB_HOST || "localhost",
-    user: process.env.DB_USER || "postgres",
-    password: process.env.DB_PASSWORD || "admin",
-    database: process.env.DB_NAME || "ellarises",
-    port: process.env.DB_PORT || 5432,
-  },
+  host: process.env.RDS_HOSTNAME,
+  user: process.env.RDS_USERNAME,
+  password: process.env.RDS_PASSWORD,
+  database: process.env.RDS_DB_NAME,
+  port: process.env.RDS_PORT,
+},
 });
 
 // --------------------------
@@ -1109,9 +1109,11 @@ async function startServer() {
     await syncDonationSequence();
     await syncEventSequence();  // <-- ADD THIS LINE
     await syncMilestoneSequence();
-    app.listen(3000, () => {
-      console.log("Server running on port 3000");
-    });
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
+});
+
   } catch (err) {
     console.error("Failed to start server:", err);
     process.exit(1);
