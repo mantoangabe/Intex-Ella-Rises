@@ -906,7 +906,7 @@ app.get("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
 
     if (!survey) return res.status(404).send("Survey not found");
 
-    res.render("surveys/editSurvey.ejs", {
+    res.render("surveys/editsurvey.ejs", {
       user: req.session.user,
       survey
     });
