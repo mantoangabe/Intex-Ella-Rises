@@ -384,6 +384,9 @@ app.get("/teapot", (req, res) => {
   res.status(418).send("I'm a teapot ☕");
 });
 
+
+
+
 async function syncDonationSequence() {
   try {
     // Get the current max donation_id in the table
