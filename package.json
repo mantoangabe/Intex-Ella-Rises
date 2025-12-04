@@ -148,5 +148,7 @@
   "bugs": {
     "url": "https://github.com/Da111an/INTEX-3-10/issues"
   },
-  "homepage": "https://github.com/Da111an/INTEX-3-10#readme"
+  "homepage": "https://github.com/Da111an/INTEX-3-10#readme",
+  "devDependencies": {},
+  "type": "commonjs"
 }
