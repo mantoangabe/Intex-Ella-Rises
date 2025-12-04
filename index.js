@@ -806,11 +806,13 @@ app.get("/milestones", requireLogin, async (req, res) => {
     const limit = 25;
     const offset = (page - 1) * limit;
 
-    // Count total milestones
-    const [{ count }] = await knex("milestones").count("* as count");
+    const isAdmin = req.session.user.role === "admin" || req.session.user.role === "manager";
+    const userId = req.session.user.id;
 
-    // Fetch milestones WITH participant names
-    const milestones = await knex("milestones as m")
+    //
+    // BASE QUERY
+    //
+    let query = knex("milestones as m")
       .leftJoin("participants as p", "m.participant_id", "p.participant_id")
       .select(
         "m.milestone_id",
@@ -818,7 +820,24 @@ app.get("/milestones", requireLogin, async (req, res) => {
         "m.title",
         "m.achieved_date",
         knex.raw("p.first_name || ' ' || p.last_name AS participant_name")
-      )
+      );
+
+    //
+    // PARTICIPANT RESTRICTION
+    //
+    if (!isAdmin) {
+      query.where("m.participant_id", userId);
+    }
+
+    //
+    // COUNT BEFORE PAGINATION
+    //
+    const [{ count }] = await query.clone().clear("select").count("* as count");
+
+    //
+    // GET RESULTS
+    //
+    const milestones = await query
       .orderBy("m.milestone_id", "asc")
       .limit(limit)
       .offset(offset);
