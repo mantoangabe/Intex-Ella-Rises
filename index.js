@@ -452,8 +452,7 @@ app.get("/pastdonations", requireLogin, async (req, res) => {
 
     // Admin/Manager sees ALL donations
     if (req.session.user.role === "admin" || req.session.user.role === "manager") {
-      countQuery = knex("donations")
-        .count("* as count");
+      countQuery = knex("donations").count("* as count");
 
       donations = await knex("donations")
         .join("participants", "donations.participant_id", "participants.participant_id")
@@ -477,20 +476,23 @@ app.get("/pastdonations", requireLogin, async (req, res) => {
         .count("* as count");
 
       donations = await knex("donations")
-        .where("donations.participant_id", req.session.user.id)
+        .where("participant_id", req.session.user.id)
         .orderBy("donations.donation_id", "asc")
         .limit(limit)
         .offset(offset);
     }
 
-    // Get total count
     const [{ count }] = await countQuery;
 
     res.render("donations/pastdonations", {
       user: req.session.user,
       donations,
       currentPage: page,
-      totalPages: Math.ceil(count / limit)
+      totalPages: Math.ceil(count / limit),
+
+    
+      searchTerm: "",
+      isSearch: false
     });
 
   } catch (err) {
