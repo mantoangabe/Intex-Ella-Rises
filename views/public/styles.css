@@ -347,4 +347,58 @@ body {
 }
 
 
+/* ======================================
+   NEW INTRO SECTION (two-column hero)
+====================================== */
+
+.er-intro-section {
+  background: var(--blue-light);
+  border-top: 6px solid var(--pink);
+  border-bottom: 6px solid var(--pink-light);
+}
+
+.intro-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.intro-subtext {
+  font-size: 1.1rem;
+  color: var(--dark);
+  max-width: 480px;
+  line-height: 1.6;
+  margin: 0 auto 1rem auto;
+}
+
+.intro-image {
+  width: 90%;
+  max-width: 420px;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  object-fit: cover;
+}
+
+/* ======================================
+   CLEAN MISSION BLOCK
+====================================== */
+
+.er-mission-clean {
+  background: var(--pink-light);
+  padding: 4rem 1rem;
+}
+
+.mission-clean-title {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.mission-clean-text {
+  max-width: 700px;
+  margin: 1rem auto;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: var(--dark);
+}
 
