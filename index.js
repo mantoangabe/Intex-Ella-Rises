@@ -693,23 +693,32 @@ app.get("/milestones", requireLogin, async (req, res) => {
 // --------------------------
 // SEARCH MILESTONES
 // --------------------------
+// ===========================
+// SEARCH MILESTONES (FIXED)
+// ===========================
 app.post("/searchmilestones", requireLogin, async (req, res) => {
-  const rawSearch = req.body.MilestoneSearch || "";
-  const q = rawSearch.trim();
+  const q = (req.body.MilestoneSearch || "").trim();
+
+  // If search box is empty → redirect safely
+  if (!q) {
+    return res.redirect("/milestones");
+  }
 
   try {
     const milestones = await knex("milestones")
       .where(function () {
         this.whereILike("title", `%${q}%`);
-        if (q !== "" && !isNaN(q)) this.orWhere("participant_id", Number(q));
+        if (!isNaN(q)) {
+          this.orWhere("participant_id", Number(q));
+        }
       })
       .orderBy("milestone_id", "asc");
 
     res.render("milestones/milestones", {
       user: req.session.user,
       milestones,
-      currentPage: 1,       // required for the EJS
-      totalPages: 1,        // search results have no pagination unless we add it
+      currentPage: 1,
+      totalPages: 1,
       nonce: res.locals.nonce
     });
 
@@ -718,6 +727,7 @@ app.post("/searchmilestones", requireLogin, async (req, res) => {
     res.status(500).send("Error searching milestones");
   }
 });
+
 
 
 
