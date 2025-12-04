@@ -142,9 +142,7 @@ app.get("/", (req, res) => {
   res.render("index", { user: req.session.user });
 });
 
-app.get("/visitor-donation", (req, res) => {
-  res.render("public/visitorDonation");
-});
+
 
 // --------------------------
 // AUTH ROUTES
@@ -440,6 +438,126 @@ app.post("/donations", requireLogin, async (req, res) => {
   } catch (err) {
     console.error("Error saving donation:", err);
     res.status(500).send("Error saving donation");
+  }
+});
+
+app.get("/pastdonations", requireLogin, async (req, res) => {
+  try {
+    let donations;
+
+    if (req.session.user.role === "admin" || req.session.user.role === "manager") {
+      // Admin sees ALL donations
+      donations = await knex("donations")
+        .join("participants", "donations.participant_id", "participants.participant_id")
+        .select(
+          "donations.donation_id",
+          "donations.participant_id",
+          "participants.first_name",
+          "participants.last_name",
+          "donations.amount",
+          "donations.donation_date"
+        )
+        .orderBy("donation_id", "asc");
+
+    } else {
+      // Normal participant sees ONLY their donations
+      donations = await knex("donations")
+        .where("participant_id", req.session.user.participant_id)
+        .select("*")
+        .orderBy("donation_id", "asc");
+    }
+
+    res.render("donations/pastdonations", {
+      user: req.session.user,
+      donations
+    });
+
+  } catch (err) {
+    console.error("Error fetching donations:", err);
+    res.status(500).send("Error loading past donations");
+  }
+});
+
+app.post("/deletedonation/:id", requireLogin, requireAdmin, async (req, res) => {
+  try {
+    await knex("donations")
+      .where("donation_id", req.params.id)
+      .del();
+
+    res.redirect("/pastdonations");
+  } catch (err) {
+    console.error("Error deleting donation:", err);
+    res.status(500).send("Error deleting donation");
+  }
+});
+
+app.post("/searchdonations", requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const term = req.body.DonationSearch.trim();
+
+    const donations = await knex("donations")
+      .join("participants", "donations.participant_id", "participants.participant_id")
+      .select(
+        "donations.donation_id",
+        "donations.participant_id",
+        "participants.first_name",
+        "participants.last_name",
+        "donations.amount",
+        "donations.donation_date"
+      )
+      .whereILike("participants.first_name", `%${term}%`)
+      .orWhereILike("participants.last_name", `%${term}%`)
+      .orWhereILike("amount", `%${term}%`)
+      .orWhereILike("donation_date", `%${term}%`)
+      .orderBy("donation_id", "asc");
+
+    res.render("donations/pastdonations", {
+      user: req.session.user,
+      donations,
+      message: `Search results for: "${term}"`
+    });
+
+  } catch (err) {
+    console.error("Donation search error:", err);
+    res.status(500).send("Error searching donations");
+  }
+});
+
+app.get("/editdonation/:id", requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const donation = await knex("donations")
+      .where("donation_id", req.params.id)
+      .first();
+
+    if (!donation) return res.status(404).send("Donation not found");
+
+    res.render("donations/editdonation", {
+      user: req.session.user,
+      donation
+    });
+
+  } catch (err) {
+    console.error("Error loading donation:", err);
+    res.status(500).send("Error loading donation");
+  }
+});
+
+app.post("/editdonation/:id", requireLogin, requireAdmin, async (req, res) => {
+  try {
+    const { amount, donation_date } = req.body;
+
+    await knex("donations")
+      .where("donation_id", req.params.id)
+      .update({
+        amount,
+        donation_date
+      });
+
+    res.redirect("/pastdonations");
+
+  } catch (err) {
+    console.error("Error updating donation:", err);
+    res.status(500).send("Error saving changes");
   }
 });
 

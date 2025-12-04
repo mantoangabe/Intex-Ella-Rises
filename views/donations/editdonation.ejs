@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Donation</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/logo.ico">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="bg-light custom-bg">
+
+<nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
+  </div>
+</nav>
+
+<div class="container mt-4">
+
+  <div class="text-center mb-3">
+    <a href="/pastdonations" class="btn btn-secondary">← Back to Donations</a>
+  </div>
+
+  <div class="card shadow-sm mb-5">
+    <div class="card-header custom-nav-color text-white">
+      <h5 class="mb-0">Edit Donation</h5>
+    </div>
+
+    <div class="card-body">
+
+      <form action="/editdonation/<%= donation.donation_id %>" method="POST">
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Donation Amount (USD)</label>
+          <input 
+            type="number" 
+            step="0.01"
+            min="0"
+            class="form-control"
+            name="amount"
+            value="<%= donation.amount %>"
+            required
+          >
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Donation Date</label>
+          <input 
+            type="date"
+            class="form-control"
+            name="donation_date"
+            value="<%= donation.donation_date.toISOString().slice(0,10) %>"
+            required
+          >
+        </div>
+
+        <button class="er-btn w-100" type="submit">
+          Save Changes
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
