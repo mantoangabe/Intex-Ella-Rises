@@ -173,19 +173,35 @@ app.get("/logout", (req, res) => {
 // --------------------------
 app.get("/participants", requireLogin, requireManager, async (req, res) => {
   try {
+    // --- Pagination setup ---
+    const page = parseInt(req.query.page) || 1;   // current page
+    const limit = 50;                             // users per page
+    const offset = (page - 1) * limit;
+
+    // --- Get total count ---
+    const [{ count }] = await knex("participants").count("* as count");
+
+    // --- Fetch this page’s users ---
     const participants = await knex("participants")
       .select("*")
-      .orderBy("participant_id", "asc");
+      .orderBy("participant_id", "asc")
+      .limit(limit)
+      .offset(offset);
 
+    // --- Render with pagination data ---
     res.render("participantinfo/seeparticipants.ejs", {
-      user: req.session.user,    // logged-in user for header
-      participants               // list for the table
+      user: req.session.user,
+      participants,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit)
     });
+
   } catch (err) {
     console.error("Error fetching users:", err);
     res.status(500).send("Error fetching user data: " + err.message);
   }
 });
+
 
 // Get route for Tableau dashboard
 app.get("/dashboard", requireLogin, requireManager, (req, res) => {
