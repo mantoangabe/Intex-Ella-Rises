@@ -14,56 +14,73 @@
 
 <body class="login-page">
 
-  <!-- HEADER WITH SMALL LOGO -->
-<header class="er-header-small">
-  <a href="/" class="back-link">← Back</a>
+<!-- ==========================
+     NAVBAR
+=========================== -->
+<nav class="navbar navbar-expand-lg er-nav">
+  <div class="container d-flex justify-content-between align-items-center">
 
-  <div class="er-logo-wrap">
-    <img src="/images/ella.jpeg" alt="Ella Rises Logo">
-  </div>
-</header>
+    <!-- Logo -->
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <img src="/images/ella.jpeg" class="er-logo-small me-2">
+      <span class="fw-bold">Ella Rises</span>
+    </a>
 
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <!-- LOGIN CARD CENTERED -->
-  <main class="login-wrapper">
-
-    <div class="login-card">
-      <h1>Login</h1>
-
-      <!-- Login Form -->
-      <form action="/login" method="POST">
-
-        <div class="form-group mb-3">
-          <label for="username">Username</label>
-          <input 
-            type="text" 
-            id="username" 
-            name="username" 
-            class="form-control"
-            required
-          >
-        </div>
-
-        <div class="form-group mb-3">
-          <label for="password">Password</label>
-          <input 
-            type="password" 
-            id="password" 
-            name="password" 
-            class="form-control"
-            required
-          >
-        </div>
-
-        <button type="submit" class="btn w-100">
-          Login
-        </button>
-      </form>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link nav-btn" href="/">← Back</a>
+        </li>
+      </ul>
     </div>
 
-  </main>
+  </div>
+</nav>
 
-  <!-- FOOTER -->
+<!-- LOGIN CARD CENTERED -->
+<main class="login-wrapper">
+
+  <div class="login-card">
+    <h1>Login</h1>
+
+    <!-- Login Form -->
+    <form action="/login" method="POST">
+
+      <div class="form-group mb-3">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          class="form-control"
+          required
+        >
+      </div>
+
+      <div class="form-group mb-3">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          class="form-control"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn w-100">
+        Login
+      </button>
+    </form>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
 <footer class="er-footer text-center py-3">
   <p class="mb-0">
     © 2025 Ella Rises — Empowering Young Women
