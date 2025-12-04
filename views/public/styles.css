@@ -71,6 +71,27 @@ body {
   padding-top: 4rem;
 }
 
+/* Shrinks hero section to fit its content without affecting other pages */
+/* Shrinks hero section to fit its content ONLY when er-hero-auto is added */
+.er-hero.er-hero-auto {
+  height: auto !important;
+  min-height: 0 !important;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+/* Force text color inside the auto hero section */
+section.er-hero.er-hero-auto h2.hero-big-title,
+section.er-hero.er-hero-auto p.hero-big-subtext {
+  color: #3A3F3B !important;
+}
+section.er-hero.er-hero-auto * {
+  color: #3A3F3B !important;
+}
+
+
+
+
 /* Light blue overlay */
 .er-hero::before {
   content: "";
