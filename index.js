@@ -200,27 +200,49 @@ app.get("/logout", (req, res) => {
 // --------------------------
 app.get("/participants", requireLogin, requireManager, async (req, res) => {
   try {
-    // --- Pagination setup ---
-    const page = parseInt(req.query.page) || 1;   // current page
-    const limit = 50;                             // users per page
+    const search = (req.query.search || "").trim();
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
     const offset = (page - 1) * limit;
 
-    // --- Get total count ---
-    const [{ count }] = await knex("participants").count("* as count");
+    //
+    // BASE QUERY
+    //
+    let query = knex("participants").select("*");
 
-    // --- Fetch this page’s users ---
-    const participants = await knex("participants")
-      .select("*")
+    //
+    // SEARCH LOGIC
+    //
+    if (search !== "") {
+      query.where(builder => {
+        builder
+          .whereILike("first_name", `%${search}%`)
+          .orWhereILike("last_name", `%${search}%`)
+          .orWhereILike("email", `%${search}%`)
+          .orWhereILike("role", `%${search}%`)
+          .orWhereRaw("first_name || ' ' || last_name ILIKE ?", [`%${search}%`]);
+      });
+    }
+
+    //
+    // COUNT RESULTS BEFORE PAGINATION
+    //
+    const [{ count }] = await query.clone().clear("select").count("* as count");
+
+    //
+    // FETCH PAGINATED RESULTS
+    //
+    const participants = await query
       .orderBy("participant_id", "asc")
       .limit(limit)
       .offset(offset);
 
-    // --- Render with pagination data ---
     res.render("participantinfo/seeparticipants.ejs", {
       user: req.session.user,
       participants,
       currentPage: page,
-      totalPages: Math.ceil(count / limit)
+      totalPages: Math.ceil(count / limit),
+      search
     });
 
   } catch (err) {
@@ -291,42 +313,9 @@ app.post("/deleteparticipant/:id", requireLogin, requireManager, async (req, res
     res.status(500).send("Error deleting participant.");
   }
 });
-//Search route
-app.post("/searchparticipants", requireLogin, requireManager, async (req, res) => {
-  const search = req.body.UserSearch.trim();
-
-  try {
-    const participants = await knex("participants")
-      .select("*")
-      .whereILike("email", `%${search}%`)
-      .orWhereILike("first_name", `%${search}%`)
-      .orWhereILike("last_name", `%${search}%`)
-      .orderBy("participant_id", "asc");
-
-    res.render("participantinfo/participantresult.ejs", {
-      user: req.session.user,          // logged-in user for navbar
-      participants,                    // result array
-      search,                          // search text
-      found: participants.length > 0   // bool
-    });
-
-  } catch (err) {
-    console.error("Error searching users:", err);
-    res.status(500).send("Error searching for users");
-  }
-});
 
 
 
-// Result page
-app.get("/participantresult", requireLogin, requireManager, (req, res) => {
-  res.render("participantinfo/participantresult.ejs", {
-    user: req.session.user,  // navbar user
-    participants: [],        // no results
-    search: "",
-    found: false
-  });
-});
 
 
 

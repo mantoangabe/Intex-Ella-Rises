@@ -12,9 +12,7 @@
 
 <body class="bg-light custom-bg">
 
-<!-- ==========================
-     NAVBAR
-=========================== -->
+<!-- NAVBAR -->
 <header class="er-header">
 <nav class="navbar navbar-expand-lg er-nav">
   <div class="container d-flex justify-content-between align-items-center">
@@ -39,7 +37,7 @@
           <li class="nav-item"><a class="nav-link nav-btn" href="/events">Events</a></li>
 
           <% if (user.role === "admin") { %>
-            <li class="nav-item"><a class="nav-link nav-btn" href="/participants">Participants</a></li>
+            <li class="nav-item"><a class="nav-link nav-btn active" href="/participants">Participants</a></li>
             <li class="nav-item"><a class="nav-link nav-btn" href="/dashboard">Dashboard</a></li>
           <% } %>
 
@@ -51,20 +49,23 @@
   </div>
 </nav>
 
+<!-- Add User Button -->
 <% if (user && user.role === "admin") { %>
 <div class="container">
-  <div class="row mb-4 justify-content-center">   
+  <div class="row mb-4 justify-content-center">
     <div class="col-4 text-center">
-      <a href="/addparticipant" class="nav-link nav-btn logout-btn mt-3" role="button">Add User</a>
+      <a href="/addparticipant" class="nav-link nav-btn logout-btn mt-3">Add User</a>
     </div>
   </div>
 </div>
 <% } %>
 </header>
 
+
+
 <div class="container">
 
-  <!-- Search -->
+  <!-- Search Users -->
   <div class="row mb-4">
     <div class="col-12">
       <div class="card shadow-sm">
@@ -72,9 +73,15 @@
           <h5 class="mb-0"><i class="bi bi-search"></i> Search Users</h5>
         </div>
         <div class="card-body">
-          <form action="/searchparticipants" method="POST">
+          <form action="/participants" method="GET">
             <div class="input-group">
-              <input type="text" name="UserSearch" class="form-control form-control-lg" placeholder="Enter email..." required>
+              <input 
+                type="text" 
+                name="search" 
+                class="form-control form-control-lg" 
+                placeholder="Search by name, email, or role..."
+                value="<%= search || '' %>"
+              >
               <button class="btn btn-dark btn-lg" type="submit">
                 <i class="bi bi-search"></i> Search
               </button>
@@ -84,6 +91,9 @@
       </div>
     </div>
   </div>
+
+
+
 
   <!-- User Table -->
   <div class="row">
@@ -103,7 +113,7 @@
                   <th>Last Name</th>
                   <th>Email</th>
                   <th>Role</th>
-                  <th>Date of Birth</th>
+                  <th>DOB</th>
                   <th>Phone</th>
                   <th>City</th>
                   <th>School/Employer</th>
@@ -115,25 +125,21 @@
               <tbody>
                 <% participants.forEach(u => { %>
                   <tr>
-                    <td class="fw-bold"><%= u.participant_id %></td>
-                    <td class="fw-bold"><%= u.first_name %></td>
-                    <td class="fw-bold"><%= u.last_name %></td>
-                    <td class="fw-bold"><%= u.email %></td>
-                    <td class="fw-bold"><%= u.role %></td>
+                    <td><%= u.participant_id %></td>
+                    <td><%= u.first_name %></td>
+                    <td><%= u.last_name %></td>
+                    <td><%= u.email %></td>
+                    <td><%= u.role %></td>
 
-                    <td class="fw-bold">
-                      <% 
-                        let dob = u.dob;
-                        if (dob instanceof Date) dob = dob.toISOString().split('T')[0];
-                        else if (typeof dob === 'string') dob = dob.split('T')[0];
-                      %>
-                      <%= dob %>
+                    <td>
+                      <% let dob = u.dob; %>
+                      <%= (dob instanceof Date ? dob.toISOString().split('T')[0] : dob.split('T')[0]) %>
                     </td>
 
-                    <td class="fw-bold"><%= u.phone %></td>
-                    <td class="fw-bold"><%= u.city %></td>
-                    <td class="fw-bold"><%= u.school_or_employer %></td>
-                    <td class="fw-bold"><%= u.field_of_interest %></td>
+                    <td><%= u.phone %></td>
+                    <td><%= u.city %></td>
+                    <td><%= u.school_or_employer %></td>
+                    <td><%= u.field_of_interest %></td>
 
                     <% if (user && user.role === "admin") { %>
                       <td>
@@ -149,7 +155,7 @@
                     <% } %>
 
                   </tr>
-                <% }); %>
+                <% }) %>
               </tbody>
             </table>
           </div>
@@ -159,11 +165,24 @@
         <div class="card-footer text-center">
           <nav>
             <ul class="pagination justify-content-center mb-0">
+
+              <!-- Prev -->
+              <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link" href="/participants?page=<%= currentPage - 1 %>&search=<%= search %>">Previous</a>
+              </li>
+
+              <!-- Page numbers -->
               <% for (let i = 1; i <= totalPages; i++) { %>
                 <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                  <a class="page-link" href="/participants?page=<%= i %>"><%= i %></a>
+                  <a class="page-link" href="/participants?page=<%= i %>&search=<%= search %>"><%= i %></a>
                 </li>
               <% } %>
+
+              <!-- Next -->
+              <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                <a class="page-link" href="/participants?page=<%= currentPage + 1 %>&search=<%= search %>">Next</a>
+              </li>
+
             </ul>
           </nav>
         </div>
@@ -172,6 +191,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Delete confirm -->
 <script nonce="<%= nonce %>">
