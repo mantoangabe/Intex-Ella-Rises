@@ -116,10 +116,8 @@
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Role</label>
                                 <select name="role" class="form-select" required>
-                                    <option value="Student" <%= user.role === 'Student' ? 'selected' : '' %>>Student</option>
-                                    <option value="Professional" <%= user.role === 'Professional' ? 'selected' : '' %>>Professional</option>
+                                    <option value="participant" <%= user.role === 'participant' ? 'selected' : '' %>>Participant</option>
                                     <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
-                                    <option value="Other" <%= user.role === 'Other' ? 'selected' : '' %>>Other</option>
                                 </select>
                             </div>
 
