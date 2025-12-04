@@ -115,9 +115,10 @@ app.use(
 // VIEW ENGINE
 // --------------------------
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));      // REQUIRED
 app.use(express.static(path.join(__dirname, "views", "public")));
-
 app.use("/images", express.static(path.join(__dirname, "images")));
+
 
 // --------------------------
 // AUTH HELPERS
@@ -592,7 +593,7 @@ app.get("/surveys/add", requireLogin, async (req, res) => {
         .orderBy("last_name", "asc");
     }
 
-    res.render("surveys/addSurvey.ejs", {
+    res.render("surveys/addsurvey.ejs", {
       user: req.session.user,
       registrations,
       participantList,
@@ -925,7 +926,7 @@ app.get("/surveys/edit/:id", requireLogin, requireManager, async (req, res) => {
 
     if (!survey) return res.status(404).send("Survey not found");
 
-    res.render("surveys/editSurvey.ejs", {
+    res.render("surveys/editsurvey.ejs", {
       user: req.session.user,
       survey
     });
